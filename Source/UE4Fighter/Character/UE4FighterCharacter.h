@@ -81,8 +81,31 @@ class AUE4FighterCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-public:
+		/** Camera boom positioning the camera behind the character */
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class USpringArmComponent* CameraBoom;
 
+	/** Follow camera */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UCameraComponent* FollowCamera;
+
+	/** Holds all animation montage **/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+		UDataTable* PlayerMeleeAttackMontageDataTable;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
+		class USoundBase* PunchSoundCue;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
+		class USoundBase* PunchThrowSoundCue;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+		class UBoxComponent* LeftFistCollisionBox;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+		class UBoxComponent* RightFistCollisionBox;
+
+public:
 	AUE4FighterCharacter();
 
 	// Called when the game starts or when the player is spawned
@@ -104,37 +127,13 @@ public:
 	UFUNCTION()
 		void OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
-
-	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FollowCamera;
-
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseTurnRate;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseTurnRate;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	float BaseLookUpRate;
-
-	/** Holds all animation montage **/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
-		UDataTable* PlayerMeleeAttackMontageDataTable;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
-		class USoundBase* PunchSoundCue;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
-		class USoundBase* PunchThrowSoundCue;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* LeftFistCollisionBox;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* RightFistCollisionBox;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseLookUpRate;
 
 protected:
 
@@ -147,16 +146,16 @@ protected:
 	/** Called for side to side input */
 	void MoveRight(float Value);
 
-	/** 
-	 * Called via input to turn at a given rate. 
-	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
-	 */
+	/**
+		* Called via input to turn at a given rate.
+		* @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
+		*/
 	void TurnAtRate(float Rate);
 
 	/**
-	 * Called via input to turn look up/down at a given rate. 
-	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
-	 */
+		* Called via input to turn look up/down at a given rate.
+		* @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
+		*/
 	void LookUpAtRate(float Rate);
 
 	/** Handler for when a touch input begins. */
@@ -169,30 +168,30 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
-	UAudioComponent* PunchThrowAudioComponent;
-private:
-	UAudioComponent* PunchAudioComponent;
-	/** Holds all collision profiles **/
-	FMeleeCollisionProfile MeleeCollisionProfile;
-	/**
-	* Log - prints a message to all the log outputs with a specific color
-	* @param LogLevel {@see ELogLevel} affects color of log
-	* @param FString the message for display
-	*/
-	void Log(ELogLevel LogLevel1, FString Message);
-	/**
-	* Log - prints a message to all the log outputs with a specific color
-	* @param LogLevel {@see ELogLevel} affects color of log
-	* @param FString the message for display
-	* @param ELogOutput - All, Output Log or Screen
-	*/
-	void Log(ELogLevel LogLevel1, FString Message, ELogOutput LogOutput);
+
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+private:
+	UAudioComponent* PunchAudioComponent;
+ UAudioComponent* PunchThrowAudioComponent;
+	FMeleeCollisionProfile MeleeCollisionProfile;
 
+	/**
+	* Log - prints a message to all the log outputs with a specific color
+	* @param LogLevel {@see ELogLevel} affects color of log
+	* @param FString the message for display
+	*/
+	void Log(ELogLevel LogLevel, FString Message);
+	/**
+	* Log - prints a message to all the log outputs with a specific color
+	* @param LogLevel {@see ELogLevel} affects color of log
+	* @param FString the message for display
+	* @param ELogOutput - All, Output Log or Screen
+	*/
+	void Log(ELogLevel LogLevel, FString Message, ELogOutput LogOutput);
 };
 

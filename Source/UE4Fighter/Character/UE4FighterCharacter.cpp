@@ -46,6 +46,33 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 
+	// load the sound cue object
+	static ConstructorHelpers::FObjectFinder<USoundBase> PunchSoundCueObject(TEXT("SoundCue'/Game/Mannequin/Sounds/Effects/punch_01_Cue.punch_01_Cue'"));
+	if (PunchSoundCueObject.Succeeded())
+	{
+		PunchSoundCue = PunchSoundCueObject.Object;
+
+		PunchAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("PunchAudioComponent"));
+		PunchAudioComponent->SetupAttachment(RootComponent);
+	}
+
+	// load the punch throw sound cue object
+	static ConstructorHelpers::FObjectFinder<USoundBase> PunchThrowSoundCueObject(TEXT("SoundCue'/Game/Mannequin/Sounds/Effects/medium_punch_throw_01_Cue.medium_punch_throw_01_Cue'"));
+	if (PunchThrowSoundCueObject.Succeeded())
+	{
+		PunchThrowSoundCue = PunchThrowSoundCueObject.Object;
+
+		PunchThrowAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("PunchThrowAudioComponent"));
+		PunchThrowAudioComponent->SetupAttachment(RootComponent);
+	}
+
+		// load the attack montage data table
+	static ConstructorHelpers::FObjectFinder<UDataTable> AttackMontageDataTable(TEXT("DataTable'/Game/Mannequin/Animations/AnimationMontages/MainAttacks.MainAttacks'"));
+	if (AttackMontageDataTable.Succeeded())
+	{
+		PlayerMeleeAttackMontageDataTable = AttackMontageDataTable.Object;
+	}
+
 	LeftFistCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftFistCollisionBox"));
 	LeftFistCollisionBox->SetupAttachment(RootComponent);
 	LeftFistCollisionBox->SetCollisionProfileName(MeleeCollisionProfile.Disabled);
@@ -60,24 +87,7 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 
 	RightFistCollisionBox->SetHiddenInGame(false);
 
-	// load the sound cue object
-	static ConstructorHelpers::FObjectFinder<USoundBase> PunchSoundCueObject(TEXT("SoundCue'/Game/TUTORIAL_RESOURCES/Audio/PunchSoundCue.PunchSoundCue'"));
-	if (PunchSoundCueObject.Succeeded())
-	{
-		PunchSoundCue = PunchSoundCueObject.Object;
 
-		PunchAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("PunchAudioComponent"));
-		PunchAudioComponent->SetupAttachment(RootComponent);
-	}
-	// load the punch throw sound cue object
-	static ConstructorHelpers::FObjectFinder<USoundBase> PunchThrowSoundCueObject(TEXT("SoundCue'/Game/TUTORIAL_RESOURCES/Audio/PunchThrowSoundCue.PunchThrowSoundCue'"));
-	if (PunchThrowSoundCueObject.Succeeded())
-	{
-		PunchThrowSoundCue = PunchThrowSoundCueObject.Object;
-
-		PunchThrowAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("PunchThrowAudioComponent"));
-		PunchThrowAudioComponent->SetupAttachment(RootComponent);
-	}
 }
 
 void AUE4FighterCharacter::BeginPlay() {
@@ -112,9 +122,13 @@ void AUE4FighterCharacter::BeginPlay() {
 }
 
 void AUE4FighterCharacter::AttackInput() {
+	// play throw punch sound if exist
+	if (PunchThrowAudioComponent) 
+	{
+		PunchThrowAudioComponent->Play(0.f);
+	}
 	if (PlayerMeleeAttackMontageDataTable)
 	{
-		Log(ELogLevel::DEBUG, "Montage attack table exist");
 		static const FString ContextStrring(TEXT("Player Attack context"));
 		FPlayerMeleeAttackMontageDataTable* PlayerMontageStruct =
 			PlayerMeleeAttackMontageDataTable->FindRow<FPlayerMeleeAttackMontageDataTable>(FName(TEXT("Selected")), ContextStrring, true);
@@ -131,9 +145,19 @@ void AUE4FighterCharacter::AttackInput() {
 }
 
 void AUE4FighterCharacter::SetPlayerMeleeCollision(bool bBoxCollision) {
+
+	FName NewCollisionProfileName;
+	bBoxCollision ? NewCollisionProfileName = MeleeCollisionProfile.Enabled : NewCollisionProfileName = MeleeCollisionProfile.Disabled;
+
+	LeftFistCollisionBox->SetCollisionProfileName(NewCollisionProfileName);
+	LeftFistCollisionBox->SetNotifyRigidBodyCollision(bBoxCollision);
+
+	RightFistCollisionBox->SetCollisionProfileName(NewCollisionProfileName);
+	RightFistCollisionBox->SetNotifyRigidBodyCollision(bBoxCollision);
 }
 
 void AUE4FighterCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
+	Log(ELogLevel::DEBUG, __FUNCTION__);
 }
 
 
