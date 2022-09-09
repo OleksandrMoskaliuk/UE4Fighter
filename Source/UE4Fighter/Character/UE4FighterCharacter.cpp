@@ -94,6 +94,9 @@ void AUE4FighterCharacter::BeginPlay() {
 
 	Super::BeginPlay();
 
+	// Enable  movement
+	IsPlayerMovementEnable = true;
+
 	// setup events for left and right collision boxes
 	LeftCollisionBox->OnComponentHit.AddDynamic(this, &AUE4FighterCharacter::OnAttackHit);
 	RightCollisionBox->OnComponentHit.AddDynamic(this, &AUE4FighterCharacter::OnAttackHit);
@@ -257,6 +260,10 @@ bool AUE4FighterCharacter::GetIsAnimationBlended() {
 	return IsAnimationBlended;
 }
 
+void AUE4FighterCharacter::SetPlayerMovement(bool PlayerMovement) {
+	this->IsPlayerMovementEnable = PlayerMovement;
+}
+
 void AUE4FighterCharacter::Log(ELogLevel LogLevel1, FString Message) {
 	Log(LogLevel1, Message, ELogOutput::ALL);
 }
@@ -355,7 +362,7 @@ void AUE4FighterCharacter::LookUpAtRate(float Rate)
 
 void AUE4FighterCharacter::MoveForward(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0.0f))
+	if ((Controller != nullptr) && (Value != 0.0f) && IsPlayerMovementEnable)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -369,7 +376,7 @@ void AUE4FighterCharacter::MoveForward(float Value)
 
 void AUE4FighterCharacter::MoveRight(float Value)
 {
-	if ( (Controller != nullptr) && (Value != 0.0f) )
+	if ( (Controller != nullptr) && (Value != 0.0f) && IsPlayerMovementEnable)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();

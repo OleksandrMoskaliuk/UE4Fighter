@@ -201,6 +201,9 @@ public:
 	/* Check if animation is blended and return this value */
 	UFUNCTION(BlueprintCallable, Category = Animation)
 		bool GetIsAnimationBlended();
+	/* Enable or disable player movement by bool */
+	UFUNCTION(BlueprintCallable, Category = Animation)
+		void SetPlayerMovement(bool PlayerMovement);
 	/** Throw sound when punch animation starts */
  UAudioComponent* PunchThrowAudioComponent;
 
@@ -210,6 +213,7 @@ private:
 	UAnimMontage* BaseAttackAnimationMontage;
 	FMeleeCollisionProfile MeleeCollisionProfile;
 	bool IsAnimationBlended;
+	bool IsPlayerMovementEnable;
 	/**
 	* Log - prints a message to all the log outputs with a specific color
 	* @param LogLevel {@see ELogLevel} affects color of log
