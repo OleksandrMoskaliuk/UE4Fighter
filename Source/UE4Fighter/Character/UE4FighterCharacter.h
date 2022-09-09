@@ -95,7 +95,7 @@ class AUE4FighterCharacter : public ACharacter
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
 		class USoundBase* PunchSoundCue;
-
+	 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
 		class USoundBase* PunchThrowSoundCue;
 
@@ -126,6 +126,18 @@ public:
 	*/
 	UFUNCTION()
 		void OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	/**
+	* Triggered when the collision overlap event begin
+	*/
+	UFUNCTION()
+		void CollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	/**
+	* Triggered when the collision overlap event ends
+	*/
+	UFUNCTION()
+	void CollisionBoxEndOwerlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -175,9 +187,13 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-private:
-	UAudioComponent* PunchAudioComponent;
+	/** Throw sound when punch animation starts */
  UAudioComponent* PunchThrowAudioComponent;
+
+private:
+	/** Trigger on attack hit when actor hit enemy */
+	UAudioComponent* PunchAudioComponent;
+ 
 	FMeleeCollisionProfile MeleeCollisionProfile;
 
 	/**

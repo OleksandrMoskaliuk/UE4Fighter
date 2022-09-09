@@ -103,6 +103,12 @@ void AUE4FighterCharacter::BeginPlay() {
 	LeftFistCollisionBox->OnComponentHit.AddDynamic(this, &AUE4FighterCharacter::OnAttackHit);
 	RightFistCollisionBox->OnComponentHit.AddDynamic(this, &AUE4FighterCharacter::OnAttackHit);
 
+	LeftFistCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxBeginOverlap);
+	RightFistCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxBeginOverlap);
+
+	LeftFistCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxEndOwerlap);
+	RightFistCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxEndOwerlap);
+
 	// make sure our audio variables are initialized
 	if (PunchSoundCue && PunchAudioComponent)
 	{
@@ -123,7 +129,7 @@ void AUE4FighterCharacter::BeginPlay() {
 
 void AUE4FighterCharacter::AttackInput() {
 	// play throw punch sound if exist
-	if (PunchThrowAudioComponent) 
+	if (PunchThrowAudioComponent && !PunchThrowAudioComponent->IsPlaying())
 	{
 		PunchThrowAudioComponent->Play(0.f);
 	}
@@ -158,6 +164,19 @@ void AUE4FighterCharacter::SetPlayerMeleeCollision(bool bBoxCollision) {
 
 void AUE4FighterCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
 	Log(ELogLevel::DEBUG, __FUNCTION__);
+	if(PunchAudioComponent && !PunchAudioComponent->IsPlaying()){
+		PunchAudioComponent->SetPitchMultiplier(FMath::RandRange(1.f, 3.f));
+	PunchAudioComponent->Play(0.f);
+	}
+}
+
+
+void AUE4FighterCharacter::CollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	Log(ELogLevel::INFO, __FUNCTION__);
+}
+
+void AUE4FighterCharacter::CollisionBoxEndOwerlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+	Log(ELogLevel::INFO, __FUNCTION__);
 }
 
 
