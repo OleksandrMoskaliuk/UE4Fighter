@@ -193,7 +193,8 @@ public:
 private:
 	/** Trigger on attack hit when actor hit enemy */
 	UAudioComponent* PunchAudioComponent;
- 
+	UAnimMontage* BaseAttackAnimationMontage;
+	int AnimationMontageSectionCount;
 	FMeleeCollisionProfile MeleeCollisionProfile;
 
 	/**

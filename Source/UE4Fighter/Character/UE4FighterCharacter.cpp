@@ -125,6 +125,18 @@ void AUE4FighterCharacter::BeginPlay() {
 		PunchThrowAudioComponent->SetSound(PunchThrowSoundCue);
 	}
 
+	if (PlayerMeleeAttackMontageDataTable)
+	{
+		static const FString ContextStrring(TEXT("Player Attack context"));
+		FPlayerMeleeAttackMontageDataTable* PlayerMontageStruct =
+			PlayerMeleeAttackMontageDataTable->FindRow<FPlayerMeleeAttackMontageDataTable>(FName(TEXT("Selected")), ContextStrring, true);
+		if (PlayerMontageStruct)
+		{
+			BaseAttackAnimationMontage = PlayerMontageStruct->Montage;
+			AnimationMontageSectionCount = PlayerMontageStruct->SectionCount;
+		}
+	}
+
 }
 
 void AUE4FighterCharacter::AttackInput() {
@@ -133,19 +145,14 @@ void AUE4FighterCharacter::AttackInput() {
 	{
 		PunchThrowAudioComponent->Play(0.f);
 	}
-	if (PlayerMeleeAttackMontageDataTable)
+
+	if (BaseAttackAnimationMontage)
 	{
-		static const FString ContextStrring(TEXT("Player Attack context"));
-		FPlayerMeleeAttackMontageDataTable* PlayerMontageStruct =
-			PlayerMeleeAttackMontageDataTable->FindRow<FPlayerMeleeAttackMontageDataTable>(FName(TEXT("Selected")), ContextStrring, true);
-		if (PlayerMontageStruct)
-		{
-			// generate  number between 1 and 3:
-			int MontageSectionIndex = FMath::FRandRange(1, PlayerMontageStruct->SectionCount);
-			// create a montage section
-			FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
-			PlayAnimMontage(PlayerMontageStruct->Montage, 1.f, FName(*MontageSection));
-		}
+		// generate  number between 1 and 3:
+		int MontageSectionIndex = FMath::FRandRange(1, AnimationMontageSectionCount);
+		// create a montage section
+		FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
+  PlayAnimMontage(BaseAttackAnimationMontage, 1.f, FName(*MontageSection));
 	}
 
 }
@@ -164,9 +171,23 @@ void AUE4FighterCharacter::SetPlayerMeleeCollision(bool bBoxCollision) {
 
 void AUE4FighterCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
 	Log(ELogLevel::DEBUG, __FUNCTION__);
-	if(PunchAudioComponent && !PunchAudioComponent->IsPlaying()){
+	if(PunchAudioComponent && !PunchAudioComponent->IsPlaying())
+	{
 		PunchAudioComponent->SetPitchMultiplier(FMath::RandRange(1.f, 3.f));
-	PunchAudioComponent->Play(0.f);
+	 PunchAudioComponent->Play(0.f);
+	}
+
+	UAnimInstance* AnimInstance = (GetMesh()) ? GetMesh()->GetAnimInstance() : nullptr;
+	if (AnimInstance && BaseAttackAnimationMontage)
+	{
+		
+			//kind of works but still go through animation
+			//AnimInstance->Montage_Stop(1.5f, PlayerMontageStruct->Montage);
+
+			AnimInstance->Montage_Pause(BaseAttackAnimationMontage);
+			float last_pose_time = AnimInstance->Montage_GetPosition(BaseAttackAnimationMontage);
+			AnimInstance->Montage_Play(BaseAttackAnimationMontage, -1.2f, EMontagePlayReturnType::Duration, last_pose_time,true);
+		
 	}
 }
 
