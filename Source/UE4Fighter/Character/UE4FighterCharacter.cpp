@@ -73,19 +73,19 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 		PlayerMeleeAttackMontageDataTable = AttackMontageDataTable.Object;
 	}
 
-	LeftFistCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftFistCollisionBox"));
-	LeftFistCollisionBox->SetupAttachment(RootComponent);
-	LeftFistCollisionBox->SetCollisionProfileName(MeleeCollisionProfile.Disabled);
-	LeftFistCollisionBox->SetNotifyRigidBodyCollision(false);
+	LeftCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftCollisionBox"));
+	LeftCollisionBox->SetupAttachment(RootComponent);
+	LeftCollisionBox->SetCollisionProfileName(MeleeCollisionProfile.Disabled);
+	LeftCollisionBox->SetNotifyRigidBodyCollision(false);
 
-	LeftFistCollisionBox->SetHiddenInGame(false);
+	LeftCollisionBox->SetHiddenInGame(false);
 
-	RightFistCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("RightFistCollisionBox"));
-	RightFistCollisionBox->SetupAttachment(RootComponent);
-	RightFistCollisionBox->SetCollisionProfileName(MeleeCollisionProfile.Disabled);
-	RightFistCollisionBox->SetNotifyRigidBodyCollision(false);
+	RightCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("RightCollisionBox"));
+	RightCollisionBox->SetupAttachment(RootComponent);
+	RightCollisionBox->SetCollisionProfileName(MeleeCollisionProfile.Disabled);
+	RightCollisionBox->SetNotifyRigidBodyCollision(false);
 
-	RightFistCollisionBox->SetHiddenInGame(false);
+	RightCollisionBox->SetHiddenInGame(false);
 
 
 }
@@ -94,20 +94,15 @@ void AUE4FighterCharacter::BeginPlay() {
 
 	Super::BeginPlay();
 
-	// attach collision components to sockets based on transformations definitions
-	const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
+	// setup events for left and right collision boxes
+	LeftCollisionBox->OnComponentHit.AddDynamic(this, &AUE4FighterCharacter::OnAttackHit);
+	RightCollisionBox->OnComponentHit.AddDynamic(this, &AUE4FighterCharacter::OnAttackHit);
 
-	LeftFistCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "fist_l_collision");
-	RightFistCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "fist_r_collision");
+	LeftCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxBeginOverlap);
+	RightCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxBeginOverlap);
 
-	LeftFistCollisionBox->OnComponentHit.AddDynamic(this, &AUE4FighterCharacter::OnAttackHit);
-	RightFistCollisionBox->OnComponentHit.AddDynamic(this, &AUE4FighterCharacter::OnAttackHit);
-
-	LeftFistCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxBeginOverlap);
-	RightFistCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxBeginOverlap);
-
-	LeftFistCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxEndOwerlap);
-	RightFistCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxEndOwerlap);
+	LeftCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxEndOwerlap);
+	RightCollisionBox->OnComponentEndOverlap.AddDynamic(this, &AUE4FighterCharacter::CollisionBoxEndOwerlap);
 
 	// make sure our audio variables are initialized
 	if (PunchSoundCue && PunchAudioComponent)
@@ -142,18 +137,25 @@ void AUE4FighterCharacter::AttackInput(EAttackType AttackType) {
 	{
 		PunchThrowAudioComponent->Play(0.f);
 	}
+
+	// attach collision components to sockets based on transformations definitions
+	const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
 	FName PickUpAttackType;
 	switch (AttackType)
 	{
 		case EAttackType::MELEE_PUNCH:
 		{
 			PickUpAttackType = TEXT("PunchAttacks");
+			LeftCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "fist_l_collision");
+			RightCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "fist_r_collision");
 			IsAnimationBlended = true;
 		}
 			break;
 		case EAttackType::MELEE_KICK:
 		{
 			PickUpAttackType = TEXT("KickAttacks");
+			LeftCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "feet_l_collision");
+			RightCollisionBox->AttachToComponent(GetMesh(), AttachmentRules, "feet_r_collision");
 			IsAnimationBlended = false;
 		}
 			break;
@@ -169,8 +171,8 @@ void AUE4FighterCharacter::AttackInput(EAttackType AttackType) {
 		{
 			// update last used animation montage 
 			BaseAttackAnimationMontage = PlayerMontageStruct->Montage;
-			// generate  number between 1 and 3:
-			int MontageSectionIndex = FMath::FRandRange(1, PlayerMontageStruct->SectionCount);
+			// generate  number between 1 and 3, depends on montage section count:
+			int MontageSectionIndex = 1 + (FMath::Rand() % PlayerMontageStruct->SectionCount - 1);
 			// create a montage section
 			FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
 			PlayAnimMontage(PlayerMontageStruct->Montage, 1.f, FName(*MontageSection));
@@ -183,11 +185,11 @@ void AUE4FighterCharacter::SetPlayerMeleeCollision(bool bBoxCollision) {
 	FName NewCollisionProfileName;
 	bBoxCollision ? NewCollisionProfileName = MeleeCollisionProfile.Enabled : NewCollisionProfileName = MeleeCollisionProfile.Disabled;
 
-	LeftFistCollisionBox->SetCollisionProfileName(NewCollisionProfileName);
-	LeftFistCollisionBox->SetNotifyRigidBodyCollision(bBoxCollision);
+	LeftCollisionBox->SetCollisionProfileName(NewCollisionProfileName);
+	LeftCollisionBox->SetNotifyRigidBodyCollision(bBoxCollision);
 
-	RightFistCollisionBox->SetCollisionProfileName(NewCollisionProfileName);
-	RightFistCollisionBox->SetNotifyRigidBodyCollision(bBoxCollision);
+	RightCollisionBox->SetCollisionProfileName(NewCollisionProfileName);
+	RightCollisionBox->SetNotifyRigidBodyCollision(bBoxCollision);
 }
 
 void AUE4FighterCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {

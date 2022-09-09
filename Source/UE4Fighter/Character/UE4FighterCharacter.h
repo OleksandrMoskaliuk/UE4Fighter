@@ -102,10 +102,10 @@ class AUE4FighterCharacter : public ACharacter
 		class USoundBase* PunchThrowSoundCue;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* LeftFistCollisionBox;
+		class UBoxComponent* LeftCollisionBox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
-		class UBoxComponent* RightFistCollisionBox;
+		class UBoxComponent* RightCollisionBox;
 
 public:
 	AUE4FighterCharacter();
