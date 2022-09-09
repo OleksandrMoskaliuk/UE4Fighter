@@ -125,36 +125,57 @@ void AUE4FighterCharacter::BeginPlay() {
 		PunchThrowAudioComponent->SetSound(PunchThrowSoundCue);
 	}
 
-	if (PlayerMeleeAttackMontageDataTable)
-	{
-		static const FString ContextStrring(TEXT("Player Attack context"));
-		FPlayerMeleeAttackMontageDataTable* PlayerMontageStruct =
-			PlayerMeleeAttackMontageDataTable->FindRow<FPlayerMeleeAttackMontageDataTable>(FName(TEXT("Selected")), ContextStrring, true);
-		if (PlayerMontageStruct)
-		{
-			BaseAttackAnimationMontage = PlayerMontageStruct->Montage;
-			AnimationMontageSectionCount = PlayerMontageStruct->SectionCount;
-		}
-	}
 
 }
 
-void AUE4FighterCharacter::AttackInput() {
+void AUE4FighterCharacter::Punch() {
+	AUE4FighterCharacter::AttackInput(EAttackType::MELEE_PUNCH);
+}
+
+void AUE4FighterCharacter::Kick() {
+	AUE4FighterCharacter::AttackInput(EAttackType::MELEE_KICK);
+}
+
+void AUE4FighterCharacter::AttackInput(EAttackType AttackType) {
 	// play throw punch sound if exist
 	if (PunchThrowAudioComponent && !PunchThrowAudioComponent->IsPlaying())
 	{
 		PunchThrowAudioComponent->Play(0.f);
 	}
-
-	if (BaseAttackAnimationMontage)
+	FName PickUpAttackType;
+	switch (AttackType)
 	{
-		// generate  number between 1 and 3:
-		int MontageSectionIndex = FMath::FRandRange(1, AnimationMontageSectionCount);
-		// create a montage section
-		FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
-  PlayAnimMontage(BaseAttackAnimationMontage, 1.f, FName(*MontageSection));
+		case EAttackType::MELEE_PUNCH:
+		{
+			PickUpAttackType = TEXT("PunchAttacks");
+			IsAnimationBlended = true;
+		}
+			break;
+		case EAttackType::MELEE_KICK:
+		{
+			PickUpAttackType = TEXT("KickAttacks");
+			IsAnimationBlended = false;
+		}
+			break;
+		default:
+			break;
 	}
-
+	static const FString ContextStrring(TEXT("Player Attack context"));
+	FPlayerMeleeAttackMontageDataTable* PlayerMontageStruct =
+		PlayerMeleeAttackMontageDataTable->FindRow<FPlayerMeleeAttackMontageDataTable>((PickUpAttackType), ContextStrring, true);
+	if (PlayerMontageStruct) 
+	{
+		if (PlayerMontageStruct->Montage)
+		{
+			// update last used animation montage 
+			BaseAttackAnimationMontage = PlayerMontageStruct->Montage;
+			// generate  number between 1 and 3:
+			int MontageSectionIndex = FMath::FRandRange(1, PlayerMontageStruct->SectionCount);
+			// create a montage section
+			FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
+			PlayAnimMontage(PlayerMontageStruct->Montage, 1.f, FName(*MontageSection));
+		}
+	}
 }
 
 void AUE4FighterCharacter::SetPlayerMeleeCollision(bool bBoxCollision) {
@@ -191,7 +212,6 @@ void AUE4FighterCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor
 	}
 }
 
-
 void AUE4FighterCharacter::CollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	Log(ELogLevel::INFO, __FUNCTION__);
 }
@@ -199,7 +219,6 @@ void AUE4FighterCharacter::CollisionBoxBeginOverlap(UPrimitiveComponent* Overlap
 void AUE4FighterCharacter::CollisionBoxEndOwerlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
 	Log(ELogLevel::INFO, __FUNCTION__);
 }
-
 
 // Input
 void AUE4FighterCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -226,8 +245,14 @@ void AUE4FighterCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AUE4FighterCharacter::OnResetVR);
+
 	// main attack input functionality
-	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &AUE4FighterCharacter::AttackInput);
+	PlayerInputComponent->BindAction("Punch", IE_Pressed, this, &AUE4FighterCharacter::Punch);
+	PlayerInputComponent->BindAction("Kick", IE_Pressed, this, &AUE4FighterCharacter::Kick);
+}
+
+bool AUE4FighterCharacter::GetIsAnimationBlended() {
+	return IsAnimationBlended;
 }
 
 void AUE4FighterCharacter::Log(ELogLevel LogLevel1, FString Message) {

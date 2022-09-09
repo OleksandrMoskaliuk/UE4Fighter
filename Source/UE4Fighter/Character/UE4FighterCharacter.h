@@ -71,9 +71,11 @@ enum class ELogOutput : uint8 {
 	SCREEN			UMETA(DisplayName = "Screen")
 };
 
+// Attack type based on animaton montage
 UENUM(BlueprintType)
 enum class EAttackType : uint8 {
-	MELEE_FIST			UMETA(DisplayName = "Melee - Fist")
+	MELEE_PUNCH			UMETA(DisplayName = "Punch attack"),
+	MELEE_KICK    UMETA(DisplayName = "Kick attack")
 };
 
 UCLASS(config=Game)
@@ -114,7 +116,17 @@ public:
 	/**
 	* Triggers attack animations based on user input
 	*/
-	void AttackInput();
+	void Punch();
+
+	/**
+	* Triggers attack animations based on user input
+	*/
+	void Kick();
+
+	/**
+	* Triggers attack animations based on punch or kick
+	*/
+	void AttackInput(EAttackType AttackType);
 
 	/**
 	* Initiates player attack by bool
@@ -186,7 +198,9 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
+	/* Check if animation is blended and return this value */
+	UFUNCTION(BlueprintCallable, Category = Animation)
+		bool GetIsAnimationBlended();
 	/** Throw sound when punch animation starts */
  UAudioComponent* PunchThrowAudioComponent;
 
@@ -194,9 +208,8 @@ private:
 	/** Trigger on attack hit when actor hit enemy */
 	UAudioComponent* PunchAudioComponent;
 	UAnimMontage* BaseAttackAnimationMontage;
-	int AnimationMontageSectionCount;
 	FMeleeCollisionProfile MeleeCollisionProfile;
-
+	bool IsAnimationBlended;
 	/**
 	* Log - prints a message to all the log outputs with a specific color
 	* @param LogLevel {@see ELogLevel} affects color of log
