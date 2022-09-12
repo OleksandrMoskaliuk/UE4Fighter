@@ -78,13 +78,19 @@ enum class EAttackType : uint8 {
 	MELEE_KICK    UMETA(DisplayName = "Kick attack")
 };
 
+UENUM(BlueprintType)
+enum class ELineTraceType : uint8 {
+	CAMERA_SINGLE				UMETA(DisplayName = "Single line, starts from camera"),
+	PLAYER_SINGLE		UMETA(DisplayName = "Single line, starts from player"),
+};
+
 UCLASS(config=Game)
 class AUE4FighterCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 		/** Camera boom positioning the camera behind the character */
-		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
 	/** Follow camera */
@@ -106,6 +112,12 @@ class AUE4FighterCharacter : public ACharacter
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* RightCollisionBox;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = LineTrace, meta = (AllowPrivateAccess = "true"))
+		ELineTraceType LineTraceType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = LineTrace, meta = (AllowPrivateAccess = "true"))
+		float LineTraceDistance;
 
 public:
 	AUE4FighterCharacter();
@@ -132,6 +144,11 @@ public:
 	* Initiates player attack by bool
 	*/
 	void SetPlayerMeleeCollision(bool bBoxCollision);
+
+	/**
+	* Trace lines from player camera or eyes
+	*/
+	void FireLineTrace();
 
 	/**
 	* Triggered when the collision hit event fires between our weapon and enemy entities

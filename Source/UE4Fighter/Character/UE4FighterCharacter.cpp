@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+//for drawing debug lines
+#include "DrawDebugHelpers.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AUE4FighterCharacter
@@ -195,6 +197,54 @@ void AUE4FighterCharacter::SetPlayerMeleeCollision(bool bBoxCollision) {
 	RightCollisionBox->SetNotifyRigidBodyCollision(bBoxCollision);
 }
 
+void AUE4FighterCharacter::FireLineTrace() {
+	
+
+	FVector  Start;
+	FVector End;
+
+	if (LineTraceType == ELineTraceType::CAMERA_SINGLE) 
+	{
+		FVector CameraLocation = FollowCamera->GetComponentLocation();
+		FRotator CameraRotation = FollowCamera->GetComponentRotation();
+		Start = CameraLocation;
+		 End = CameraLocation + (CameraRotation.Vector() * LineTraceDistance);
+		//FVector Cone = FMath::VRandCone(CameraRotation.Vector(), FMath::DegreesToRadians(30.f), FMath::DegreesToRadians(30.f));
+		//End = CameraLocation + Cone * LineTraceDistance;
+
+	}
+	else if (LineTraceType == ELineTraceType::PLAYER_SINGLE) 
+	{
+		FVector PlayerEyesLocation = GetPawnViewLocation();
+		FRotator PlayerEyesRotation = GetViewRotation();
+		//Fill previously declared variables
+		//this->GetActorEyesViewPoint(PlayerEyesLocation, PlayerEyesRotation);
+		Start = PlayerEyesLocation;
+		End = PlayerEyesLocation + (PlayerEyesRotation.Vector() * LineTraceDistance);
+	}
+
+	FHitResult HitResult = FHitResult(ForceInit);
+
+	FCollisionQueryParams TraceParams(FName(TEXT("Line Trace Params")),true, NULL);
+	TraceParams.bTraceComplex = true;
+	TraceParams.bReturnPhysicalMaterial = true;
+	 
+	bool IsHit = this->GetWorld()->LineTraceSingleByChannel(HitResult,Start, End,ECollisionChannel::ECC_GameTraceChannel3, TraceParams);
+
+	if (IsHit) 
+	{
+		Log(ELogLevel::DEBUG, "We hit something!");
+		DrawDebugLine(GetWorld(),Start,End, FColor::Green,false,2.f,ECC_WorldStatic,1.f);
+		DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(2.f, 2.f, 2.f), FColor::Blue, false, 2.f, ECC_WorldStatic, 1.f);
+	}
+	else 
+	{
+		Log(ELogLevel::DEBUG, "We hit nothing!");
+		DrawDebugLine(GetWorld(), Start, End, FColor::White, false, 2.f, ECC_WorldStatic, 1.f);
+	}
+
+}
+
 void AUE4FighterCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
 	Log(ELogLevel::DEBUG, __FUNCTION__);
 	if(PunchAudioComponent && !PunchAudioComponent->IsPlaying())
@@ -254,6 +304,10 @@ void AUE4FighterCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	// main attack input functionality
 	PlayerInputComponent->BindAction("Punch", IE_Pressed, this, &AUE4FighterCharacter::Punch);
 	PlayerInputComponent->BindAction("Kick", IE_Pressed, this, &AUE4FighterCharacter::Kick);
+
+	//fire line trace
+	PlayerInputComponent->BindAction("FireLineTrace", IE_Pressed, this, &AUE4FighterCharacter::FireLineTrace);
+
 }
 
 bool AUE4FighterCharacter::GetIsAnimationBlended() {
