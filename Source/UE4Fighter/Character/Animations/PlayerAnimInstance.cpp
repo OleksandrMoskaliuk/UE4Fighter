@@ -34,9 +34,9 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds) {
    IsAnimationBlended = PlayerCharacter->GetIsAnimationBlended();
    Speed = PlayerCharacter->GetVelocity().Size();
 
-   GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "IsInAir: " + FString(IsInAir ? "true" : "false"));
-   GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "Is Animation Blended: " + FString(IsAnimationBlended ? "true" : "false"));
-   GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "Speed: " + FString::SanitizeFloat(Speed));
+   //GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "IsInAir: " + FString(IsInAir ? "true" : "false"));
+   //GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "Is Animation Blended: " + FString(IsAnimationBlended ? "true" : "false"));
+   //GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "Speed: " + FString::SanitizeFloat(Speed));
   }
  }
 }
