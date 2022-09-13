@@ -42,11 +42,21 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Destructible")
 		float DefaulImpulse;
 
+private:
+	FTimerHandle DestroyTimer;
+	// variables for  ADestructibleProps::TimerTrigger
+	FVector HitLocation;
+	FVector ImpulseDirection;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
+
+	// Will destroy actor when timer trigger
+	void TimerTrigger();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

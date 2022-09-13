@@ -26,7 +26,7 @@ ADestructibleProps::ADestructibleProps()
 	IsTriggerEnable = false;
 	MaxHealth = 1.f;
 	DefaultDamage = 1.f;
-	DefaulImpulse = 1.f;
+	DefaulImpulse = 10000.f;
 
 }
 
@@ -44,11 +44,19 @@ void ADestructibleProps::BeginPlay()
 	
 }
 
+void ADestructibleProps::TimerTrigger() {
+	
+	if (IsDestroyed)
+		return;
+	IsDestroyed = true;
+	GEngine->AddOnScreenDebugMessage(-1, 2.5f, FColor::Red, "Kabooooom!");
+	DestructibleComponent->ApplyDamage(10000.f, HitLocation, ImpulseDirection, DefaulImpulse);
+}
+
 // Called every frame
 void ADestructibleProps::Tick(float DeltaTime)
 {
 	AActor::Tick(DeltaTime);
-
 }
 
 void ADestructibleProps::Damage(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
@@ -59,20 +67,25 @@ void ADestructibleProps::Damage(UPrimitiveComponent* HitComponent, AActor* Other
 }
 
 void ADestructibleProps::Trigger(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-
-
+	if (IsDestroyed){
+		return;
+	}
 	if (OtherActor)
 	{
 		//UBoxComponent* CollisionBox = Cast<UBoxComponent>(OtherActor);
-		GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Blue, OtherActor->GetName());
 		AUE4FighterCharacter* Player = Cast<AUE4FighterCharacter>(OtherActor);
 		if (Player != NULL)
 		{
-			 if(Player->GetIsAnimationBlended()){
-					DestructibleComponent->ApplyDamage(10000.f, DestructibleComponent->GetComponentLocation(), OtherComp->GetPhysicsLinearVelocity(), 10000.f);
+			 // fill params for ADestructibleProps::TimerTrigger() 
+				HitLocation = DestructibleComponent->GetComponentLocation();
+				ImpulseDirection = OtherComp->GetPhysicsLinearVelocity();
+				bool IsTimerActive = GetWorld()->GetTimerManager().IsTimerActive(this->DestroyTimer);
+				if (!IsDestroyed && !IsTimerActive)
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 2.5f, FColor::Yellow, "TimerHasBeenStarted");
+					GetWorld()->GetTimerManager().SetTimer(DestroyTimer, this, &ADestructibleProps::TimerTrigger, 5.f, false);
 				}
-		}	
+		}
 	}
-	
 }
 
