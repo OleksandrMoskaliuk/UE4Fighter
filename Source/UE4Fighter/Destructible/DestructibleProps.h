@@ -47,6 +47,7 @@ private:
 	// variables for  ADestructibleProps::TimerTrigger
 	FVector HitLocation;
 	FVector ImpulseDirection;
+	float TimeToDestroy;
 
 protected:
 	// Called when the game starts or when spawned
@@ -56,6 +57,9 @@ public:
 
 	// Will destroy actor when timer trigger
 	void TimerTrigger();
+
+	//count down timer trigger when player near
+	void CountDownTimer();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

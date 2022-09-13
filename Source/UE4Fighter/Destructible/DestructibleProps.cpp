@@ -53,6 +53,25 @@ void ADestructibleProps::TimerTrigger() {
 	DestructibleComponent->ApplyDamage(10000.f, HitLocation, ImpulseDirection, DefaulImpulse);
 }
 
+void ADestructibleProps::CountDownTimer() {
+
+	if (IsDestroyed)
+	{
+		return;
+	}
+	TimeToDestroy -= 0.2f;
+	if (TimeToDestroy <= 0.f) 
+	{
+		IsDestroyed = true;
+		GEngine->AddOnScreenDebugMessage(-1, 2.5f, FColor::Red, "Kabooooom!");
+		DestructibleComponent->ApplyDamage(10000.f, HitLocation, ImpulseDirection, DefaulImpulse);
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.5f, FColor::Red,  FString::SanitizeFloat(TimeToDestroy) + "s, to cube explosion");
+	}
+}
+
 // Called every frame
 void ADestructibleProps::Tick(float DeltaTime)
 {
@@ -82,8 +101,9 @@ void ADestructibleProps::Trigger(UPrimitiveComponent* OverlappedComponent, AActo
 				bool IsTimerActive = GetWorld()->GetTimerManager().IsTimerActive(this->DestroyTimer);
 				if (!IsDestroyed && !IsTimerActive)
 				{
-					GEngine->AddOnScreenDebugMessage(-1, 2.5f, FColor::Yellow, "TimerHasBeenStarted");
-					GetWorld()->GetTimerManager().SetTimer(DestroyTimer, this, &ADestructibleProps::TimerTrigger, 5.f, false);
+					GEngine->AddOnScreenDebugMessage(-1, 2.5f, FColor::Red, "TimerHasBeenStarted");
+					this->TimeToDestroy = FMath::RandRange(2.f, 9.f);
+					GetWorld()->GetTimerManager().SetTimer(DestroyTimer, this, &ADestructibleProps::CountDownTimer, 0.2f,true);
 				}
 		}
 	}
