@@ -128,15 +128,31 @@ void AUE4FighterCharacter::BeginPlay() {
 
 }
 
-void AUE4FighterCharacter::Punch() {
-	AUE4FighterCharacter::AttackInput(EAttackType::MELEE_PUNCH);
+void AUE4FighterCharacter::LightPunch() {
+	AUE4FighterCharacter::AttackInput(EAttackType::MELEE_PUNCH, EAttackModificator::LIGHT);
 }
 
-void AUE4FighterCharacter::Kick() {
-	AUE4FighterCharacter::AttackInput(EAttackType::MELEE_KICK);
+void AUE4FighterCharacter::MediumPunch() {
+	AUE4FighterCharacter::AttackInput(EAttackType::MELEE_PUNCH, EAttackModificator::MEDIUM);
 }
 
-void AUE4FighterCharacter::AttackInput(EAttackType AttackType) {
+void AUE4FighterCharacter::StrongPunch() {
+	AUE4FighterCharacter::AttackInput(EAttackType::MELEE_PUNCH, EAttackModificator::STRONG);
+}
+
+void AUE4FighterCharacter::LightKick() {
+	AUE4FighterCharacter::AttackInput(EAttackType::MELEE_KICK, EAttackModificator::LIGHT);
+}
+
+void AUE4FighterCharacter::MediumKick() {
+	AUE4FighterCharacter::AttackInput(EAttackType::MELEE_KICK, EAttackModificator::MEDIUM);
+}
+
+void AUE4FighterCharacter::StrongKick() {
+	AUE4FighterCharacter::AttackInput(EAttackType::MELEE_KICK, EAttackModificator::STRONG);
+}
+
+void AUE4FighterCharacter::AttackInput(EAttackType AttackType, EAttackModificator AttackModificator) {
 	// play throw punch sound if exist
 	if (PunchThrowAudioComponent && !PunchThrowAudioComponent->IsPlaying())
 	{
@@ -176,10 +192,10 @@ void AUE4FighterCharacter::AttackInput(EAttackType AttackType) {
 		{
 			// update last used animation montage 
 			BaseAttackAnimationMontage = PlayerMontageStruct->Montage;
-			// generate  number between 1 and 3, depends on montage section count:
-			int MontageSectionIndex = 1 + (FMath::Rand() % PlayerMontageStruct->SectionCount - 1);
+	  // generate  number between 1 and 3, depends on montage section count:
+			//int MontageSectionIndex = 1 + (FMath::Rand() % PlayerMontageStruct->SectionCount - 1);
 			// create a montage section
-			FString MontageSection = "start_" + FString::FromInt(MontageSectionIndex);
+			FString MontageSection = "start_" + FString::FromInt((int)AttackModificator + 1);
 			PlayAnimMontage(PlayerMontageStruct->Montage, 1.f, FName(*MontageSection));
 		}
 	}
@@ -301,9 +317,13 @@ void AUE4FighterCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AUE4FighterCharacter::OnResetVR);
 
-	// main attack input functionality
-	PlayerInputComponent->BindAction("Punch", IE_Pressed, this, &AUE4FighterCharacter::Punch);
-	PlayerInputComponent->BindAction("Kick", IE_Pressed, this, &AUE4FighterCharacter::Kick);
+	//attack input functionality
+	PlayerInputComponent->BindAction("LightPunch", IE_Pressed, this, &AUE4FighterCharacter::LightPunch);
+	PlayerInputComponent->BindAction("MediumPunch", IE_Pressed, this, &AUE4FighterCharacter::MediumPunch);
+	PlayerInputComponent->BindAction("StrongPunch", IE_Pressed, this, &AUE4FighterCharacter::StrongPunch);
+	PlayerInputComponent->BindAction("LightKick", IE_Pressed, this, &AUE4FighterCharacter::LightKick);
+	PlayerInputComponent->BindAction("MediumKick", IE_Pressed, this, &AUE4FighterCharacter::MediumKick);
+	PlayerInputComponent->BindAction("StrongKick", IE_Pressed, this, &AUE4FighterCharacter::StrongKick);
 
 	//fire line trace
 	PlayerInputComponent->BindAction("FireLineTrace", IE_Pressed, this, &AUE4FighterCharacter::FireLineTrace);

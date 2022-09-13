@@ -78,6 +78,14 @@ enum class EAttackType : uint8 {
 	MELEE_KICK    UMETA(DisplayName = "Kick attack")
 };
 
+// Attack type modificator based on animaton montage
+UENUM(BlueprintType)
+enum class EAttackModificator : uint8 {
+	LIGHT			UMETA(DisplayName = "Light attack mod"),
+	MEDIUM    UMETA(DisplayName = "Medium attack mod"),
+	STRONG UMETA(DisplayName = "Strong attack mod")
+};
+
 UENUM(BlueprintType)
 enum class ELineTraceType : uint8 {
 	CAMERA_SINGLE				UMETA(DisplayName = "Single line, starts from camera"),
@@ -128,17 +136,37 @@ public:
 	/**
 	* Triggers attack animations based on user input
 	*/
-	void Punch();
+	void LightPunch();
 
 	/**
 	* Triggers attack animations based on user input
 	*/
-	void Kick();
+	void MediumPunch();
+
+	/**
+* Triggers attack animations based on user input
+*/
+	void StrongPunch();
+
+	/**
+	* Triggers attack animations based on user input
+	*/
+	void LightKick();
+
+	/**
+	* Triggers attack animations based on user input
+	*/
+	void MediumKick();
+
+	/**
+	* Triggers attack animations based on user input
+	*/
+	void StrongKick();
 
 	/**
 	* Triggers attack animations based on punch or kick
 	*/
-	void AttackInput(EAttackType AttackType);
+	void AttackInput(EAttackType AttackType, EAttackModificator AttackModificator);
 
 	/**
 	* Initiates player attack by bool
