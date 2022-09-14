@@ -259,6 +259,12 @@ private:
 	FMeleeCollisionProfile MeleeCollisionProfile;
 	bool IsAnimationBlended;
 	bool IsPlayerMovementEnable;
+	// Reset combo count timer handler
+	FTimerHandle ResetComboCountTimer;
+	int ComboCount;
+
+	/** Resets combo counter after few seconds */
+	void ResetCombo();
 	/**
 	* Log - prints a message to all the log outputs with a specific color
 	* @param LogLevel {@see ELogLevel} affects color of log

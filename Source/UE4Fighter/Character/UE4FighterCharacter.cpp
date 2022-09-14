@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 //for drawing debug lines
 #include "DrawDebugHelpers.h"
+#include "../UI/InGameHUD.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AUE4FighterCharacter
@@ -89,7 +90,7 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 
 	RightCollisionBox->SetHiddenInGame(false);
 
-
+	ComboCount = 0;
 }
 
 void AUE4FighterCharacter::BeginPlay() {
@@ -281,6 +282,22 @@ void AUE4FighterCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor
 			AnimInstance->Montage_Play(BaseAttackAnimationMontage, -1.2f, EMontagePlayReturnType::Duration, last_pose_time,true);
 		
 	}
+
+	//combo logick
+	AInGameHUD* InGameHUD = Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	bool IsComboTimerActive = GetWorld()->GetTimerManager().IsTimerActive(this->ResetComboCountTimer);
+	if (IsComboTimerActive) 
+	{
+		GetWorld()->GetTimerManager().ClearTimer(this->ResetComboCountTimer);
+		GetWorld()->GetTimerManager().SetTimer(this->ResetComboCountTimer, this, &AUE4FighterCharacter::ResetCombo, 1.f, false);
+	}
+	else
+	{
+		GetWorld()->GetTimerManager().SetTimer(this->ResetComboCountTimer,this, &AUE4FighterCharacter::ResetCombo, 1.f, false);
+	}
+	this->ComboCount++;
+	InGameHUD->UpdateComboCount(ComboCount);
+
 }
 
 void AUE4FighterCharacter::CollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
@@ -336,6 +353,14 @@ bool AUE4FighterCharacter::GetIsAnimationBlended() {
 
 void AUE4FighterCharacter::SetPlayerMovement(bool PlayerMovement) {
 	this->IsPlayerMovementEnable = PlayerMovement;
+}
+
+void AUE4FighterCharacter::ResetCombo() {
+	ComboCount = 0;
+	AInGameHUD* InGameHUD = Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	if(InGameHUD){
+	InGameHUD->ResetCombo();
+	}
 }
 
 void AUE4FighterCharacter::Log(ELogLevel LogLevel1, FString Message) {
