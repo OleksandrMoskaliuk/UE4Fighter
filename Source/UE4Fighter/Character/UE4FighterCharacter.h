@@ -168,6 +168,16 @@ public:
 	*/
 	void AttackInput(EAttackType AttackType, EAttackModificator AttackModificator);
 
+	/**
+	* Trigger arm animation after punch or kick
+	*/
+	void SetArmAnimationAfterHit();
+	/**
+	* Trigger off arm animation by timer 
+	*/
+	void ResetArmAnimationAfterHit();
+
+
 	/** Sets crouching locomotion variable to proper state */
 	void CrouchingLocomotionStart();
 
@@ -254,6 +264,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Animation)
 		bool GetIsAnimationBlended();
 
+	/* Check if play arm animation */
+	UFUNCTION(BlueprintCallable, Category = Animation)
+		bool GetIsPlayerArm();
+
 	/* Enable or disable player movement by bool */
 	UFUNCTION(BlueprintCallable, Category = Animation)
 		void SetPlayerMovement(bool PlayerMovement);
@@ -262,14 +276,20 @@ public:
  UAudioComponent* PunchThrowAudioComponent;
 
 private:
+
 	/** Trigger on attack hit when actor hit enemy */
 	UAudioComponent* PunchAudioComponent;
 	UAnimMontage* BaseAttackAnimationMontage;
 	FMeleeCollisionProfile MeleeCollisionProfile;
 	bool IsAnimationBlended;
 	bool IsPlayerMovementEnable;
+	bool IsArmed;
 	// Reset combo count timer handler
 	FTimerHandle ResetComboCountTimer;
+
+	/** Count down arm/idle animation time */
+	FTimerHandle StopArmAnimationTimer;
+
 	int ComboCount;
 
 	/** Resets combo counter after few seconds */

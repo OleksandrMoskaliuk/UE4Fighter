@@ -158,7 +158,6 @@ void AUE4FighterCharacter::AttackInput(EAttackType AttackType, EAttackModificato
 	{
 		PunchThrowAudioComponent->Play(0.f);
 	}
-
 	// attach collision components to sockets based on transformations definitions
 	const FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::KeepWorld, false);
 	FName PickUpAttackType;
@@ -199,6 +198,21 @@ void AUE4FighterCharacter::AttackInput(EAttackType AttackType, EAttackModificato
 			PlayAnimMontage(PlayerMontageStruct->Montage, 1.f, FName(*MontageSection));
 		}
 	}
+	// Set Arm animation
+	this->SetArmAnimationAfterHit();
+}
+
+void AUE4FighterCharacter::SetArmAnimationAfterHit() {
+	this->IsArmed = true;
+	FTimerManager *TimerManager = &GetWorld()->GetTimerManager();
+	TimerManager->ClearTimer(StopArmAnimationTimer);
+	TimerManager->SetTimer(this->StopArmAnimationTimer, this, &AUE4FighterCharacter::ResetArmAnimationAfterHit, 5.f, false);	
+}
+
+void AUE4FighterCharacter::ResetArmAnimationAfterHit() {
+	this->IsArmed = false;
+	FTimerManager* TimerManager = &GetWorld()->GetTimerManager();
+	TimerManager->ClearTimer(StopArmAnimationTimer);
 }
 
 void AUE4FighterCharacter::CrouchingLocomotionStart() {
@@ -360,6 +374,10 @@ void AUE4FighterCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 bool AUE4FighterCharacter::GetIsAnimationBlended() {
 	return IsAnimationBlended;
+}
+
+bool AUE4FighterCharacter::GetIsPlayerArm() {
+	return this->IsArmed;
 }
 
 void AUE4FighterCharacter::SetPlayerMovement(bool PlayerMovement) {

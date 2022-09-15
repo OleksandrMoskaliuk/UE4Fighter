@@ -25,8 +25,11 @@ public:
  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Instance")
   float Speed;
 
- UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crouching locomotion")
+ UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Instance")
   bool IsCrouching;
+
+ UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Instance")
+  bool IsArmed;
 
 public:
 
