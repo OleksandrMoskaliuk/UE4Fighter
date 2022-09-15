@@ -126,6 +126,10 @@ class AUE4FighterCharacter : public ACharacter
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = LineTrace, meta = (AllowPrivateAccess = "true"))
 		float LineTraceDistance;
+	
+	/** Set how long to play OnArm animation idle after  player input hit */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+		float OnArmedDelay;
 
 public:
 	AUE4FighterCharacter();

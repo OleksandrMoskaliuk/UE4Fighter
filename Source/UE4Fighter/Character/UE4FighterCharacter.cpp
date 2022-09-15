@@ -90,6 +90,7 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 
 	RightCollisionBox->SetHiddenInGame(false);
 	ComboCount = 0;
+	OnArmedDelay = 5.f;
 }
 
 void AUE4FighterCharacter::BeginPlay() {
@@ -206,7 +207,7 @@ void AUE4FighterCharacter::SetArmAnimationAfterHit() {
 	this->IsArmed = true;
 	FTimerManager *TimerManager = &GetWorld()->GetTimerManager();
 	TimerManager->ClearTimer(StopArmAnimationTimer);
-	TimerManager->SetTimer(this->StopArmAnimationTimer, this, &AUE4FighterCharacter::ResetArmAnimationAfterHit, 5.f, false);	
+	TimerManager->SetTimer(this->StopArmAnimationTimer, this, &AUE4FighterCharacter::ResetArmAnimationAfterHit, this->OnArmedDelay, false);	
 }
 
 void AUE4FighterCharacter::ResetArmAnimationAfterHit() {
