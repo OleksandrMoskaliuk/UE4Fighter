@@ -1,8 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "../UI/ComboWidget.h"
 #include "Animation/WidgetAnimation.h"
+#include "../UI/ComboWidget.h"
 
 
 UComboWidget::UComboWidget(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer) {
