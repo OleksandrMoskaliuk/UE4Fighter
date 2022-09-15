@@ -89,7 +89,6 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 	RightCollisionBox->SetNotifyRigidBodyCollision(false);
 
 	RightCollisionBox->SetHiddenInGame(false);
-
 	ComboCount = 0;
 }
 
@@ -200,6 +199,14 @@ void AUE4FighterCharacter::AttackInput(EAttackType AttackType, EAttackModificato
 			PlayAnimMontage(PlayerMontageStruct->Montage, 1.f, FName(*MontageSection));
 		}
 	}
+}
+
+void AUE4FighterCharacter::CrouchingLocomotionStart() {
+	this->Crouch();
+}
+
+void AUE4FighterCharacter::CrouchingLocomotionEnd() {
+	this->UnCrouch();
 }
 
 void AUE4FighterCharacter::SetPlayerMeleeCollision(bool bBoxCollision) {
@@ -344,6 +351,10 @@ void AUE4FighterCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 
 	//fire line trace
 	PlayerInputComponent->BindAction("FireLineTrace", IE_Pressed, this, &AUE4FighterCharacter::FireLineTrace);
+
+	//Crouching locomotion
+	PlayerInputComponent->BindAction("CrouchingLocomotion", IE_Pressed, this, &AUE4FighterCharacter::CrouchingLocomotionStart);
+	PlayerInputComponent->BindAction("CrouchingLocomotion", IE_Released, this, &AUE4FighterCharacter::CrouchingLocomotionEnd);
 
 }
 

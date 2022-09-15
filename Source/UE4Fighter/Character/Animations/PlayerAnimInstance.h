@@ -25,6 +25,9 @@ public:
  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Instance")
   float Speed;
 
+ UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Crouching locomotion")
+  bool IsCrouching;
+
 public:
 
  UPlayerAnimInstance();

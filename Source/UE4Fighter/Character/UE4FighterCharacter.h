@@ -168,6 +168,12 @@ public:
 	*/
 	void AttackInput(EAttackType AttackType, EAttackModificator AttackModificator);
 
+	/** Sets crouching locomotion variable to proper state */
+	void CrouchingLocomotionStart();
+
+	/** Sets crouching locomotion variable to proper state */
+	void CrouchingLocomotionEnd();
+
 	/**
 	* Initiates player attack by bool
 	*/
@@ -243,12 +249,15 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	
 	/* Check if animation is blended and return this value */
 	UFUNCTION(BlueprintCallable, Category = Animation)
 		bool GetIsAnimationBlended();
+
 	/* Enable or disable player movement by bool */
 	UFUNCTION(BlueprintCallable, Category = Animation)
 		void SetPlayerMovement(bool PlayerMovement);
+
 	/** Throw sound when punch animation starts */
  UAudioComponent* PunchThrowAudioComponent;
 
