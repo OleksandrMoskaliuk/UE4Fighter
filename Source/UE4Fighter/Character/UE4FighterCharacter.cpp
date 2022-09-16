@@ -34,6 +34,7 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -90,7 +91,9 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 
 	RightCollisionBox->SetHiddenInGame(false);
 	ComboCount = 0;
-	OnArmedDelay = 5.f;
+	MaxCountDownToIdle = 5.f;
+	bIsWalking = false;
+
 }
 
 void AUE4FighterCharacter::BeginPlay() {
@@ -207,7 +210,7 @@ void AUE4FighterCharacter::SetArmAnimationAfterHit() {
 	this->IsArmed = true;
 	FTimerManager *TimerManager = &GetWorld()->GetTimerManager();
 	TimerManager->ClearTimer(StopArmAnimationTimer);
-	TimerManager->SetTimer(this->StopArmAnimationTimer, this, &AUE4FighterCharacter::ResetArmAnimationAfterHit, this->OnArmedDelay, false);	
+	TimerManager->SetTimer(this->StopArmAnimationTimer, this, &AUE4FighterCharacter::ResetArmAnimationAfterHit, this->MaxCountDownToIdle, false);	
 }
 
 void AUE4FighterCharacter::ResetArmAnimationAfterHit() {
@@ -216,12 +219,34 @@ void AUE4FighterCharacter::ResetArmAnimationAfterHit() {
 	TimerManager->ClearTimer(StopArmAnimationTimer);
 }
 
+void AUE4FighterCharacter::SwitchPlayerWalkRunAnimation() {
+	bIsWalking = !bIsWalking;
+	
+	if(bIsWalking){
+	GetCharacterMovement()->MaxWalkSpeed = 95.f;
+	}
+	else // else running
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 375.f;
+	}
+
+}
+
 void AUE4FighterCharacter::CrouchingLocomotionStart() {
-	this->Crouch();
+	//check if player not in air
+	if (!GetMovementComponent()->IsFalling())
+	{
+		this->Crouch();
+	}
+	
 }
 
 void AUE4FighterCharacter::CrouchingLocomotionEnd() {
-	this->UnCrouch();
+	//check if player not in air
+	if (!GetMovementComponent()->IsFalling())
+	{
+		this->UnCrouch();
+	}
 }
 
 void AUE4FighterCharacter::SetPlayerMeleeCollision(bool bBoxCollision) {
@@ -302,7 +327,6 @@ void AUE4FighterCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor
 			AnimInstance->Montage_Pause(BaseAttackAnimationMontage);
 			float last_pose_time = AnimInstance->Montage_GetPosition(BaseAttackAnimationMontage);
 			AnimInstance->Montage_Play(BaseAttackAnimationMontage, -1.2f, EMontagePlayReturnType::Duration, last_pose_time,true);
-		
 	}
 
 	//combo logick
@@ -370,6 +394,8 @@ void AUE4FighterCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	//Crouching locomotion
 	PlayerInputComponent->BindAction("CrouchingLocomotion", IE_Pressed, this, &AUE4FighterCharacter::CrouchingLocomotionStart);
 	PlayerInputComponent->BindAction("CrouchingLocomotion", IE_Released, this, &AUE4FighterCharacter::CrouchingLocomotionEnd);
+	// Walk/Run switcher
+	PlayerInputComponent->BindAction("Walk/Run", IE_Pressed, this, &AUE4FighterCharacter::SwitchPlayerWalkRunAnimation);
 
 }
 
@@ -383,6 +409,10 @@ bool AUE4FighterCharacter::GetIsPlayerArm() {
 
 void AUE4FighterCharacter::SetPlayerMovement(bool PlayerMovement) {
 	this->IsPlayerMovementEnable = PlayerMovement;
+}
+
+bool AUE4FighterCharacter::GetIsPlayerWalking() {
+	return bIsWalking;
 }
 
 void AUE4FighterCharacter::ResetCombo() {

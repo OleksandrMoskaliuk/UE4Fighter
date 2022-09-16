@@ -98,40 +98,45 @@ class AUE4FighterCharacter : public ACharacter
 	GENERATED_BODY()
 
 		/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 		class USpringArmComponent* CameraBoom;
 
 	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 		class UCameraComponent* FollowCamera;
 
 	/** Holds all animation montage **/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 		UDataTable* PlayerMeleeAttackMontageDataTable;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+		float MaxCountDownToIdle;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+		bool bIsWalking;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio", meta = (AllowPrivateAccess = "true"))
 		class USoundBase* PunchSoundCue;
 	 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Audio, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio", meta = (AllowPrivateAccess = "true"))
 		class USoundBase* PunchThrowSoundCue;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* LeftCollisionBox;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* RightCollisionBox;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = LineTrace, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LineTrace", meta = (AllowPrivateAccess = "true"))
 		ELineTraceType LineTraceType;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = LineTrace, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LineTrace", meta = (AllowPrivateAccess = "true"))
 		float LineTraceDistance;
 	
-	/** Set how long to play OnArm animation idle after  player input hit */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
-		float OnArmedDelay;
+	
 
 public:
+
 	AUE4FighterCharacter();
 
 	// Called when the game starts or when the player is spawned
@@ -181,6 +186,11 @@ public:
 	*/
 	void ResetArmAnimationAfterHit();
 
+	/**
+	* Switch between walk and run animation 
+	* basically change player speed
+	*/
+	void SwitchPlayerWalkRunAnimation();
 
 	/** Sets crouching locomotion variable to proper state */
 	void CrouchingLocomotionStart();
@@ -224,6 +234,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseLookUpRate;
 
+	/** Throw sound when punch animation starts */
+	UAudioComponent* PunchThrowAudioComponent;
+
 protected:
 
 	/** Resets HMD orientation in VR. */
@@ -253,17 +266,18 @@ protected:
 	/** Handler for when a touch input stops. */
 	void TouchStopped(ETouchIndex::Type FingerIndex, FVector Location);
 
-protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
 
-public:
+public: // Getters and Setters
+
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	
+
 	/* Check if animation is blended and return this value */
 	UFUNCTION(BlueprintCallable, Category = Animation)
 		bool GetIsAnimationBlended();
@@ -272,27 +286,30 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Animation)
 		bool GetIsPlayerArm();
 
+	/* Check if play arm animation */
+	UFUNCTION(BlueprintCallable, Category = "Animation")
+		bool GetIsPlayerWalking();
+
 	/* Enable or disable player movement by bool */
 	UFUNCTION(BlueprintCallable, Category = Animation)
 		void SetPlayerMovement(bool PlayerMovement);
-
-	/** Throw sound when punch animation starts */
- UAudioComponent* PunchThrowAudioComponent;
 
 private:
 
 	/** Trigger on attack hit when actor hit enemy */
 	UAudioComponent* PunchAudioComponent;
+
+// Reset combo count timer handler
+	FTimerHandle ResetComboCountTimer;
+
+	/** Count down arm/idle animation time */
+	FTimerHandle StopArmAnimationTimer;
+
 	UAnimMontage* BaseAttackAnimationMontage;
 	FMeleeCollisionProfile MeleeCollisionProfile;
 	bool IsAnimationBlended;
 	bool IsPlayerMovementEnable;
 	bool IsArmed;
-	// Reset combo count timer handler
-	FTimerHandle ResetComboCountTimer;
-
-	/** Count down arm/idle animation time */
-	FTimerHandle StopArmAnimationTimer;
 
 	int ComboCount;
 
