@@ -35,6 +35,8 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds) {
    Speed = PlayerCharacter->GetVelocity().Size();
    IsCrouching = PlayerCharacter->GetMovementComponent()->IsCrouching();
    IsArmed = PlayerCharacter->GetIsPlayerArm();
+   bIsWalking = PlayerCharacter->GetIsPlayerWalking();
+
    //GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "IsArmed: " + FString(IsArmed ? "true" : "false"));
    //GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "IsInAir: " + FString(IsInAir ? "true" : "false"));
    //GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "Is Animation Blended: " + FString(IsAnimationBlended ? "true" : "false"));

@@ -31,6 +31,9 @@ public:
  UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Instance")
   bool IsArmed;
 
+ UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Animation Instance")
+  bool bIsWalking;
+
 public:
 
  UPlayerAnimInstance();
