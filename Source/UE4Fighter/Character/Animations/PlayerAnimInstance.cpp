@@ -36,6 +36,8 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds) {
    IsCrouching = PlayerCharacter->GetMovementComponent()->IsCrouching();
    IsArmed = PlayerCharacter->GetIsPlayerArm();
    bIsWalking = PlayerCharacter->GetIsPlayerWalking();
+   MoveForward = PlayerCharacter->GetMoveForwardValue();
+   MoveRight = PlayerCharacter->GetMoveRightValue();
 
    //GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "IsArmed: " + FString(IsArmed ? "true" : "false"));
    //GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, "IsInAir: " + FString(IsInAir ? "true" : "false"));

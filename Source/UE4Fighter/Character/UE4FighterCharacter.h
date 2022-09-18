@@ -133,7 +133,12 @@ class AUE4FighterCharacter : public ACharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LineTrace", meta = (AllowPrivateAccess = "true"))
 		float LineTraceDistance;
 	
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+		float PlayerNormalSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+		float PlayerOnArmedlSpeed;
+
 
 public:
 
@@ -294,6 +299,14 @@ public: // Getters and Setters
 	UFUNCTION(BlueprintCallable, Category = Animation)
 		void SetPlayerMovement(bool PlayerMovement);
 
+	/* Check if animation is blended and return this value */
+	UFUNCTION(BlueprintCallable, Category = "Locomotion")
+		float GetMoveForwardValue();
+
+	/* Check if animation is blended and return this value */
+	UFUNCTION(BlueprintCallable, Category = "Locomotion")
+		float GetMoveRightValue();
+
 private:
 
 	/** Trigger on attack hit when actor hit enemy */
@@ -310,6 +323,10 @@ private:
 	bool IsAnimationBlended;
 	bool IsPlayerMovementEnable;
 	bool IsArmed;
+
+	//Inputs from controller 
+	float MoveForwardValue;
+	float MoveRightValue;
 
 	int ComboCount;
 

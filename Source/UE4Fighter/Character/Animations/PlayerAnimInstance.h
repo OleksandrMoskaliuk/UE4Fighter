@@ -34,6 +34,12 @@ public:
  UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Animation Instance")
   bool bIsWalking;
 
+ UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Animation Instance")
+  float MoveForward;
+
+ UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Animation Instance")
+  float MoveRight;
+
 public:
 
  UPlayerAnimInstance();

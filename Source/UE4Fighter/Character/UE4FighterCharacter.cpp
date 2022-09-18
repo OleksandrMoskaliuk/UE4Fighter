@@ -94,6 +94,8 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 	MaxCountDownToIdle = 5.f;
 	bIsWalking = false;
 
+	PlayerNormalSpeed = 375.f;
+	PlayerOnArmedlSpeed = 250.f;
 }
 
 void AUE4FighterCharacter::BeginPlay() {
@@ -411,6 +413,14 @@ void AUE4FighterCharacter::SetPlayerMovement(bool PlayerMovement) {
 	this->IsPlayerMovementEnable = PlayerMovement;
 }
 
+float AUE4FighterCharacter::GetMoveForwardValue() {
+	return this->MoveForwardValue;
+}
+
+float AUE4FighterCharacter::GetMoveRightValue() {
+	return this->MoveRightValue;
+}
+
 bool AUE4FighterCharacter::GetIsPlayerWalking() {
 	return bIsWalking;
 }
@@ -521,29 +531,54 @@ void AUE4FighterCharacter::LookUpAtRate(float Rate)
 
 void AUE4FighterCharacter::MoveForward(float Value)
 {
+	MoveForwardValue = Value;
 	if ((Controller != nullptr) && (Value != 0.0f) && IsPlayerMovementEnable)
 	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-
-		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+		if(IsArmed && !bIsCrouched)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = PlayerOnArmedlSpeed;
+			GetCharacterMovement()->bOrientRotationToMovement = false;
+			GetCharacterMovement()->bUseControllerDesiredRotation = true;
+			AddMovementInput(GetActorForwardVector(), Value);
+		}else
+		{
+			GetCharacterMovement()->MaxWalkSpeed = PlayerNormalSpeed;
+			GetCharacterMovement()->bOrientRotationToMovement = true;
+			GetCharacterMovement()->bUseControllerDesiredRotation = false;
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+		}
 	}
 }
 
 void AUE4FighterCharacter::MoveRight(float Value)
 {
+	MoveRightValue = Value;
 	if ( (Controller != nullptr) && (Value != 0.0f) && IsPlayerMovementEnable)
 	{
-		// find out which way is right
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
-		// get right vector 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		// add movement in that direction
-		AddMovementInput(Direction, Value);
-	}
+		if(IsArmed && !bIsCrouched)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = PlayerOnArmedlSpeed;
+			GetCharacterMovement()->bOrientRotationToMovement = false;
+			GetCharacterMovement()->bUseControllerDesiredRotation = true;
+			AddMovementInput(GetActorRightVector(), Value);
+		}
+		else 
+		{
+			GetCharacterMovement()->MaxWalkSpeed = PlayerNormalSpeed;
+			GetCharacterMovement()->bOrientRotationToMovement = true;
+			GetCharacterMovement()->bUseControllerDesiredRotation = false;
+			// find out which way is right
+		 const FRotator Rotation = Controller->GetControlRotation();
+		 const FRotator YawRotation(0, Rotation.Yaw, 0);
+		 // get right vector 
+		 const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		 // add movement in that direction
+		 AddMovementInput(Direction, Value);
+	 }
+	}	
 }
