@@ -94,7 +94,8 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 	MaxCountDownToIdle = 5.f;
 	bIsWalking = false;
 
-	PlayerNormalSpeed = 375.f;
+	PlayerRunSpeed = 375.f;
+	PlayerWalkSpeed = 95.f;
 	PlayerOnArmedlSpeed = 250.f;
 }
 
@@ -225,11 +226,11 @@ void AUE4FighterCharacter::SwitchPlayerWalkRunAnimation() {
 	bIsWalking = !bIsWalking;
 	
 	if(bIsWalking){
-	GetCharacterMovement()->MaxWalkSpeed = 95.f;
+		GetCharacterMovement()->MaxWalkSpeed = PlayerWalkSpeed;
 	}
 	else // else running
 	{
-		GetCharacterMovement()->MaxWalkSpeed = 375.f;
+		GetCharacterMovement()->MaxWalkSpeed = PlayerRunSpeed;
 	}
 
 }
@@ -534,15 +535,13 @@ void AUE4FighterCharacter::MoveForward(float Value)
 	MoveForwardValue = Value;
 	if ((Controller != nullptr) && (Value != 0.0f) && IsPlayerMovementEnable)
 	{
-		if(IsArmed && !bIsCrouched)
+		if(IsArmed && !bIsCrouched && !bIsWalking)
 		{
-			GetCharacterMovement()->MaxWalkSpeed = PlayerOnArmedlSpeed;
 			GetCharacterMovement()->bOrientRotationToMovement = false;
 			GetCharacterMovement()->bUseControllerDesiredRotation = true;
 			AddMovementInput(GetActorForwardVector(), Value);
 		}else
 		{
-			GetCharacterMovement()->MaxWalkSpeed = PlayerNormalSpeed;
 			GetCharacterMovement()->bOrientRotationToMovement = true;
 			GetCharacterMovement()->bUseControllerDesiredRotation = false;
 			// find out which way is forward
@@ -560,16 +559,14 @@ void AUE4FighterCharacter::MoveRight(float Value)
 	MoveRightValue = Value;
 	if ( (Controller != nullptr) && (Value != 0.0f) && IsPlayerMovementEnable)
 	{
-		if(IsArmed && !bIsCrouched)
+		if(IsArmed && !bIsCrouched && !bIsWalking)
 		{
-			GetCharacterMovement()->MaxWalkSpeed = PlayerOnArmedlSpeed;
 			GetCharacterMovement()->bOrientRotationToMovement = false;
 			GetCharacterMovement()->bUseControllerDesiredRotation = true;
 			AddMovementInput(GetActorRightVector(), Value);
 		}
 		else 
 		{
-			GetCharacterMovement()->MaxWalkSpeed = PlayerNormalSpeed;
 			GetCharacterMovement()->bOrientRotationToMovement = true;
 			GetCharacterMovement()->bUseControllerDesiredRotation = false;
 			// find out which way is right

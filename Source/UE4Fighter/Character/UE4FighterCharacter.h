@@ -134,7 +134,10 @@ class AUE4FighterCharacter : public ACharacter
 		float LineTraceDistance;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
-		float PlayerNormalSpeed;
+		float PlayerRunSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+		float PlayerWalkSpeed;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 		float PlayerOnArmedlSpeed;
