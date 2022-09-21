@@ -11,7 +11,7 @@
 //for drawing debug lines
 #include "DrawDebugHelpers.h"
 #include "../UI/InGameHUD.h"
-
+#include "../Interfaces/ExampleInterface.h"
 //////////////////////////////////////////////////////////////////////////
 // AUE4FighterCharacter
 
@@ -266,7 +266,6 @@ void AUE4FighterCharacter::SetPlayerMeleeCollision(bool bBoxCollision) {
 
 void AUE4FighterCharacter::FireLineTrace() {
 	
-
 	FVector  Start;
 	FVector End;
 
@@ -301,8 +300,15 @@ void AUE4FighterCharacter::FireLineTrace() {
 	if (IsHit) 
 	{
 		Log(ELogLevel::DEBUG, "We hit something!");
+		Log(ELogLevel::DEBUG, "We hit " + HitResult.GetActor()->GetName());
 		DrawDebugLine(GetWorld(),Start,End, FColor::Green,false,2.f,ECC_WorldStatic,1.f);
 		DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(2.f, 2.f, 2.f), FColor::Blue, false, 2.f, ECC_WorldStatic, 1.f);
+		//check if it actor has interface than execute it
+		if (HitResult.GetActor()->GetClass()->ImplementsInterface(UExampleInterface::StaticClass()))
+		{
+			IExampleInterface::Execute_Interact(HitResult.GetActor());
+			Log(ELogLevel::DEBUG, "We hit AActorInterfaceTest!");
+		}
 	}
 	else 
 	{
