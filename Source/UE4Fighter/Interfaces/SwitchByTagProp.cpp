@@ -6,6 +6,7 @@
 #include "ExampleInterface.h"
 #include "Engine/Engine.h"
 
+
 // Sets default values
 ASwitchByTagProp::ASwitchByTagProp()
 {
@@ -37,10 +38,21 @@ void ASwitchByTagProp::Interact_Implementation() {
 		AActor* Actor = *ActorIterator;
 		if (Actor && Actor != this && Actor->GetClass()->ImplementsInterface(UExampleInterface::StaticClass())) 
 		{
-			for (FName Tag : Actor->Tags) 
+			/*for (FName Tag : Actor->Tags) 
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, Tag.ToString());
+			}*/
+
+			// only AddOnScreenDebugMessage when actor has a specific tag
+			for (FName Tag : ToggleTags) 
+			{
+				if (Actor->ActorHasTag(Tag)) 
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Emerald, Tag.ToString());
+					IExampleInterface::Execute_Interact(Actor);
+				}
 			}
+			
 		}
 	}
 

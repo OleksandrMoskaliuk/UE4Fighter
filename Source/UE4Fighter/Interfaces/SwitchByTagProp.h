@@ -7,6 +7,7 @@
 #include "ExampleInterface.h"
 #include "SwitchByTagProp.generated.h"
 
+
 UCLASS()
 class UE4FIGHTER_API ASwitchByTagProp : public AActor, public IExampleInterface
 {
@@ -14,6 +15,9 @@ class UE4FIGHTER_API ASwitchByTagProp : public AActor, public IExampleInterface
 	
 		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 		class UStaticMeshComponent* BaseMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Tags", meta = (AllowPrivateAccess = "true"))
+		TArray<FName> ToggleTags;
 
 public:	
 	// Sets default values for this actor's properties

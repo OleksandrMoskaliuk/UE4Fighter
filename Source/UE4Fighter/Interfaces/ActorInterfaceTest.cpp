@@ -49,6 +49,11 @@ void AActorInterfaceTest::Interact_Implementation() {
 	}
 	else 
 	{
+		//GetWorld()->GetTimerManager().SetTimer(JumpTimer, this, &AActorInterfaceTest::Jump, 3.f, true);
+		if (GetWorld()->GetTimerManager().IsTimerActive(JumpTimer))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(JumpTimer);
+		}
 		//this->BaseMesh->SetWorldScale3D(FVector(1.f, 1.f, 1.f));
 	}
 	bIsBig = !bIsBig;
