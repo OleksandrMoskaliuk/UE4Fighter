@@ -306,8 +306,8 @@ void AUE4FighterCharacter::FireLineTrace() {
 		//check if it actor has interface than execute it
 		if (HitResult.GetActor()->GetClass()->ImplementsInterface(UExampleInterface::StaticClass()))
 		{
-			IExampleInterface::Execute_Interact(HitResult.GetActor());
 			Log(ELogLevel::DEBUG, "We hit AActorInterfaceTest!");
+			IExampleInterface::Execute_Interact(HitResult.GetActor());
 		}
 	}
 	else 
