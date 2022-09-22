@@ -17,7 +17,7 @@ class UE4FIGHTER_API AActorInterfaceTest : public AActor, public IExampleInterfa
 		class UStaticMeshComponent* BaseMesh;
 
 	 bool bIsBig;
-
+		bool bIsScaled;
 		FTimerHandle JumpTimer;
 
 public:	

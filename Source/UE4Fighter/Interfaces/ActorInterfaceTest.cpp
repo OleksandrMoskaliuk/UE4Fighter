@@ -12,6 +12,7 @@ AActorInterfaceTest::AActorInterfaceTest() {
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMesh"));
 	BaseMesh->SetupAttachment(RootComponent); 
 	bIsBig = false;
+	bIsScaled = false;
 }
 
 // Called when the game starts or when spawned
@@ -23,11 +24,20 @@ void AActorInterfaceTest::BeginPlay() {
 // Called every frame
 void AActorInterfaceTest::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+	if (bIsScaled) 
+	{
+		BaseMesh->SetWorldScale3D(FMath::Lerp(BaseMesh->GetComponentScale(), FVector(2.f,2.f,2.f),0.1f));
+	}
+	else 
+	{
+		BaseMesh->SetWorldScale3D(FMath::Lerp(BaseMesh->GetComponentScale(), FVector(1.f, 1.f, 1.f), 0.1f));
+	}
 	
 }
 
 void AActorInterfaceTest::Jump() {
 	BaseMesh->AddImpulse(FVector(0.f, 0.f, 200000.f), FName(TEXT("Impulse")));
+	bIsScaled = !bIsScaled;
 }
 
 void AActorInterfaceTest::Interact_Implementation() {
