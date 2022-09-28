@@ -35,6 +35,10 @@ public:
 		void Interact(); //prototype declaration
 	 virtual void Interact_Implementation() override; //actual implemantation
 
+		UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interact")
+			void ApplyDamage(float Damage); //prototype declaration
+		virtual void ApplyDamage_Implementation(float Damage) override; //actual implemantation
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

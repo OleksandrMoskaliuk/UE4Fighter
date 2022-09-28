@@ -58,3 +58,7 @@ void ASwitchByTagProp::Interact_Implementation() {
 
 }
 
+void ASwitchByTagProp::ApplyDamage_Implementation(float Damage) {
+	GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Emerald, "ApplyDamage_Implementation  does not implemented" + FString::SanitizeFloat(Damage));
+}
+

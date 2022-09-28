@@ -60,3 +60,7 @@ void AActorInterfaceTest::Interact_Implementation() {
 
 }
 
+void AActorInterfaceTest::ApplyDamage_Implementation(float Damage) {
+	GEngine->AddOnScreenDebugMessage(1, 2.f, FColor::Emerald, "ApplyDamage_Implementation " + FString::SanitizeFloat(Damage));
+}
+

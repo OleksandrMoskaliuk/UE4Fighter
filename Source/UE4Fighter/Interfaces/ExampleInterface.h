@@ -25,4 +25,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interact")
 		void Interact();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interact")
+		void ApplyDamage(float Damage);
 };

@@ -303,11 +303,14 @@ void AUE4FighterCharacter::FireLineTrace() {
 		Log(ELogLevel::DEBUG, "We hit " + HitResult.GetActor()->GetName());
 		DrawDebugLine(GetWorld(),Start,End, FColor::Green,false,2.f,ECC_WorldStatic,1.f);
 		DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(2.f, 2.f, 2.f), FColor::Blue, false, 2.f, ECC_WorldStatic, 1.f);
-		//check if it actor has interface than execute it
+
+		//check if it actor has interface UExampleInterface
 		if (HitResult.GetActor()->GetClass()->ImplementsInterface(UExampleInterface::StaticClass()))
 		{
 			Log(ELogLevel::DEBUG, "We hit AActorInterfaceTest!");
 			IExampleInterface::Execute_Interact(HitResult.GetActor());
+			// passing parameter example
+			IExampleInterface::Execute_ApplyDamage(HitResult.GetActor(), 12.f);
 		}
 	}
 	else 
