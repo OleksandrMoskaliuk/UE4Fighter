@@ -97,6 +97,7 @@ AUE4FighterCharacter::AUE4FighterCharacter()
 	PlayerRunSpeed = 375.f;
 	PlayerWalkSpeed = 95.f;
 	PlayerOnArmedlSpeed = 250.f;
+	bIsCurrentlyPossessed = true;
 }
 
 void AUE4FighterCharacter::BeginPlay() {
@@ -104,7 +105,7 @@ void AUE4FighterCharacter::BeginPlay() {
 	Super::BeginPlay();
 
 	// Enable  movement
-	IsPlayerMovementEnable = true;
+	bIsPlayerMovementEnable = true;
 
 	// setup events for left and right collision boxes
 	LeftCollisionBox->OnComponentHit.AddDynamic(this, &AUE4FighterCharacter::OnAttackHit);
@@ -132,6 +133,9 @@ void AUE4FighterCharacter::BeginPlay() {
 		PunchThrowAudioComponent->SetSound(PunchThrowSoundCue);
 	}
 
+	//Setup player movement  based on class default values
+	GetCharacterMovement()->MaxWalkSpeed = PlayerRunSpeed;
+	bIsWalking = false;
 
 }
 
@@ -210,14 +214,14 @@ void AUE4FighterCharacter::AttackInput(EAttackType AttackType, EAttackModificato
 }
 
 void AUE4FighterCharacter::SetArmAnimationAfterHit() {
-	this->IsArmed = true;
+	this->bIsArmed = true;
 	FTimerManager *TimerManager = &GetWorld()->GetTimerManager();
 	TimerManager->ClearTimer(StopArmAnimationTimer);
 	TimerManager->SetTimer(this->StopArmAnimationTimer, this, &AUE4FighterCharacter::ResetArmAnimationAfterHit, this->MaxCountDownToIdle, false);	
 }
 
 void AUE4FighterCharacter::ResetArmAnimationAfterHit() {
-	this->IsArmed = false;
+	this->bIsArmed = false;
 	FTimerManager* TimerManager = &GetWorld()->GetTimerManager();
 	TimerManager->ClearTimer(StopArmAnimationTimer);
 }
@@ -265,7 +269,7 @@ void AUE4FighterCharacter::SetPlayerMeleeCollision(bool bBoxCollision) {
 }
 
 void AUE4FighterCharacter::FireLineTrace() {
-	
+
 	FVector  Start;
 	FVector End;
 
@@ -273,8 +277,8 @@ void AUE4FighterCharacter::FireLineTrace() {
 	{
 		FVector CameraLocation = FollowCamera->GetComponentLocation();
 		FRotator CameraRotation = FollowCamera->GetComponentRotation();
-		Start = CameraLocation;
-		 End = CameraLocation + (CameraRotation.Vector() * LineTraceDistance);
+		Start = CameraLocation + (CameraRotation.Vector() * LineTraceStartPointOffsetDistance);
+		End = CameraLocation + (CameraRotation.Vector() * LineTraceDistance);
 		//FVector Cone = FMath::VRandCone(CameraRotation.Vector(), FMath::DegreesToRadians(30.f), FMath::DegreesToRadians(30.f));
 		//End = CameraLocation + Cone * LineTraceDistance;
 
@@ -283,9 +287,10 @@ void AUE4FighterCharacter::FireLineTrace() {
 	{
 		FVector PlayerEyesLocation = GetPawnViewLocation();
 		FRotator PlayerEyesRotation = GetViewRotation();
+
 		//Fill previously declared variables
 		//this->GetActorEyesViewPoint(PlayerEyesLocation, PlayerEyesRotation);
-		Start = PlayerEyesLocation;
+		Start = PlayerEyesLocation + (PlayerEyesRotation.Vector() * LineTraceStartPointOffsetDistance);
 		End = PlayerEyesLocation + (PlayerEyesRotation.Vector() * LineTraceDistance);
 	}
 
@@ -312,12 +317,100 @@ void AUE4FighterCharacter::FireLineTrace() {
 			// passing parameter example
 			IExampleInterface::Execute_ApplyDamage(HitResult.GetActor(), 12.f);
 		}
-	}
+	} 
 	else 
 	{
 		Log(ELogLevel::DEBUG, "We hit nothing!");
 		DrawDebugLine(GetWorld(), Start, End, FColor::White, false, 2.f, ECC_WorldStatic, 1.f);
 	}
+
+}
+
+void AUE4FighterCharacter::PossessAnotherCharacter() {
+
+	Log(ELogLevel::DEBUG, __FUNCTION__);
+
+	FVector  Start;
+	FVector End;
+
+	if (LineTraceType == ELineTraceType::CAMERA_SINGLE)
+	{
+		FVector CameraLocation = FollowCamera->GetComponentLocation();
+		FRotator CameraRotation = FollowCamera->GetComponentRotation();
+		Start = CameraLocation + (CameraRotation.Vector() * LineTraceStartPointOffsetDistance);
+		End = CameraLocation + (CameraRotation.Vector() * LineTraceDistance);
+		//FVector Cone = FMath::VRandCone(CameraRotation.Vector(), FMath::DegreesToRadians(30.f), FMath::DegreesToRadians(30.f));
+		//End = CameraLocation + Cone * LineTraceDistance;
+
+	}
+	else if (LineTraceType == ELineTraceType::PLAYER_SINGLE)
+	{
+		FVector PlayerEyesLocation = GetPawnViewLocation();
+		FRotator PlayerEyesRotation = GetViewRotation();
+
+		//Fill previously declared variables
+		//this->GetActorEyesViewPoint(PlayerEyesLocation, PlayerEyesRotation);
+		Start = PlayerEyesLocation + (PlayerEyesRotation.Vector() * LineTraceStartPointOffsetDistance);
+		End = PlayerEyesLocation + (PlayerEyesRotation.Vector() * LineTraceDistance);
+	}
+
+	FHitResult HitResult = FHitResult(ForceInit);
+
+	FCollisionQueryParams TraceParams(FName(TEXT("Line Trace Params")), true, NULL);
+	TraceParams.bTraceComplex = true;
+	//TraceParams.bReturnPhysicalMaterial = true;
+
+	bool IsHit = this->GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_GameTraceChannel3, TraceParams);
+
+	if (IsHit && HitResult.GetActor()->IsA(AUE4FighterCharacter::StaticClass()) && HitResult.GetActor() != this)
+	{
+		Log(ELogLevel::DEBUG, "We hit another actor!");
+		Log(ELogLevel::DEBUG, "We hit " + HitResult.GetActor()->GetName());
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 2.f, ECC_WorldStatic, 1.f);
+		DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(2.f, 2.f, 2.f), FColor::Blue, false, 2.f, ECC_WorldStatic, 1.f);
+
+		AUE4FighterCharacter* PossessableCharacter = Cast<AUE4FighterCharacter>(HitResult.GetActor());
+		if(!SavedController){ // if we get controller in first time
+		SavedController = GetController();
+		}
+		if (PossessableCharacter->bIsCurrentlyPossessed) 
+		{
+			Log(ELogLevel::DEBUG, "Character already possessed");
+			return;
+		}
+		//disable move state managment
+		bIsArmed = false;
+		bIsPlayerMovementEnable = false;
+		bIsCurrentlyPossessed = false;
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+		// set materials to default befor possess another character
+		if (DefaultMaterialBody && DefaultMaterialChest) 
+		{
+			//index 0 -> body; index 1 -> chest;
+			GetMesh()->SetMaterial(0, DefaultMaterialBody);
+			GetMesh()->SetMaterial(1, DefaultMaterialChest);
+		}
+		// UnPossess old character
+		SavedController->UnPossess();
+		// Possess new character
+		SavedController->Possess(PossessableCharacter);
+		// enable move state managment
+		PossessableCharacter->bIsCurrentlyPossessed = true;
+		bIsPlayerMovementEnable = true;
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+		// change materials for possessing character
+		if (PossessableCharacter->PossesedMaterialBody && PossessableCharacter->PossesedMaterialChest) 
+		{
+			//index 0 -> body; index 1 -> chest;
+			PossessableCharacter->GetMesh()->SetMaterial(0, PossessableCharacter->PossesedMaterialBody);
+			PossessableCharacter->GetMesh()->SetMaterial(1, PossessableCharacter->PossesedMaterialChest);
+		}
+	}
+	else
+	{
+		Log(ELogLevel::DEBUG, "Possessing failed");
+	}
+
 
 }
 
@@ -403,6 +496,9 @@ void AUE4FighterCharacter::SetupPlayerInputComponent(class UInputComponent* Play
 	//fire line trace
 	PlayerInputComponent->BindAction("FireLineTrace", IE_Pressed, this, &AUE4FighterCharacter::FireLineTrace);
 
+	//Posess another  character bind
+	PlayerInputComponent->BindAction("PossessCharacter", IE_Pressed, this, &AUE4FighterCharacter::PossessAnotherCharacter);
+
 	//Crouching locomotion
 	PlayerInputComponent->BindAction("CrouchingLocomotion", IE_Pressed, this, &AUE4FighterCharacter::CrouchingLocomotionStart);
 	PlayerInputComponent->BindAction("CrouchingLocomotion", IE_Released, this, &AUE4FighterCharacter::CrouchingLocomotionEnd);
@@ -416,11 +512,11 @@ bool AUE4FighterCharacter::GetIsAnimationBlended() {
 }
 
 bool AUE4FighterCharacter::GetIsPlayerArm() {
-	return this->IsArmed;
+	return this->bIsArmed;
 }
 
 void AUE4FighterCharacter::SetPlayerMovement(bool PlayerMovement) {
-	this->IsPlayerMovementEnable = PlayerMovement;
+	this->bIsPlayerMovementEnable = PlayerMovement;
 }
 
 float AUE4FighterCharacter::GetMoveForwardValue() {
@@ -542,9 +638,9 @@ void AUE4FighterCharacter::LookUpAtRate(float Rate)
 void AUE4FighterCharacter::MoveForward(float Value)
 {
 	MoveForwardValue = Value;
-	if ((Controller != nullptr) && (Value != 0.0f) && IsPlayerMovementEnable)
+	if ((Controller != nullptr) && (Value != 0.0f) && bIsPlayerMovementEnable)
 	{
-		if(IsArmed && !bIsCrouched && !bIsWalking)
+		if(bIsArmed && !bIsCrouched && !bIsWalking)
 		{
 			GetCharacterMovement()->bOrientRotationToMovement = false;
 			GetCharacterMovement()->bUseControllerDesiredRotation = true;
@@ -566,9 +662,9 @@ void AUE4FighterCharacter::MoveForward(float Value)
 void AUE4FighterCharacter::MoveRight(float Value)
 {
 	MoveRightValue = Value;
-	if ( (Controller != nullptr) && (Value != 0.0f) && IsPlayerMovementEnable)
+	if ( (Controller != nullptr) && (Value != 0.0f) && bIsPlayerMovementEnable)
 	{
-		if(IsArmed && !bIsCrouched && !bIsWalking)
+		if(bIsArmed && !bIsCrouched && !bIsWalking)
 		{
 			GetCharacterMovement()->bOrientRotationToMovement = false;
 			GetCharacterMovement()->bUseControllerDesiredRotation = true;

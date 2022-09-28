@@ -109,39 +109,85 @@ class AUE4FighterCharacter : public ACharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 		UDataTable* PlayerMeleeAttackMontageDataTable;
 
+	/** Counter for  geting back to idle animation **/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 		float MaxCountDownToIdle;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
+	/** Material, for set possesed back to normal, body  **/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Materials", meta = (AllowPrivateAccess = "true"))
+	UMaterialInstance* DefaultMaterialBody;
+
+	/** Material, for set possesed back to normal, chest  **/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Materials", meta = (AllowPrivateAccess = "true"))
+		UMaterialInstance* DefaultMaterialChest;
+
+	/** Material, for current character after possessing, body **/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Materials", meta = (AllowPrivateAccess = "true"))
+		UMaterialInstance* PossesedMaterialBody;
+
+	/** Material, for current character after possessing, chest  **/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Materials", meta = (AllowPrivateAccess = "true"))
+		UMaterialInstance* PossesedMaterialChest;
+
+	//** Movement state management */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State Management", meta = (AllowPrivateAccess = "true"))
 		bool bIsWalking;
 
+	//** Movement state management */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State Management", meta = (AllowPrivateAccess = "true"))
+	 bool IsAnimationBlended;
+
+	//** Movement state management */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State Management", meta = (AllowPrivateAccess = "true"))
+	 bool bIsPlayerMovementEnable;
+
+	//** Movement state management */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State Management", meta = (AllowPrivateAccess = "true"))
+	 bool bIsArmed;
+
+	/** Audio component, play when on hit event happens */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio", meta = (AllowPrivateAccess = "true"))
 		class USoundBase* PunchSoundCue;
-	 
+
+	/** Audio component, play when player press attack button */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio", meta = (AllowPrivateAccess = "true"))
 		class USoundBase* PunchThrowSoundCue;
 
+	/** Collision, LeftCollisionBox */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* LeftCollisionBox;
 
+	/** Collision, Right CollisionBox */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision", meta = (AllowPrivateAccess = "true"))
 		class UBoxComponent* RightCollisionBox;
 
+	/**Line trace, type that decide to strike from player eyes or head */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LineTrace", meta = (AllowPrivateAccess = "true"))
 		ELineTraceType LineTraceType;
 
+	/**Line trace, distance between start & end points */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LineTrace", meta = (AllowPrivateAccess = "true"))
 		float LineTraceDistance;
+
+	/**Line trace, offset to shift start point next to end point  */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LineTrace", meta = (AllowPrivateAccess = "true"))
+		float LineTraceStartPointOffsetDistance;
 	
+	/**Line trace, decides whether character possessed or not */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LineTrace", meta = (AllowPrivateAccess = "true"))
+	 bool bIsCurrentlyPossessed;
+
+	/** Animation,  speed when player in run state  */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 		float PlayerRunSpeed;
 
+	/** Animation, speed when player in walk state */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 		float PlayerWalkSpeed;
 
+	/** Animation, speed when player in armed state */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation", meta = (AllowPrivateAccess = "true"))
 		float PlayerOnArmedlSpeed;
-
 
 public:
 
@@ -215,6 +261,11 @@ public:
 	* Trace lines from player camera or eyes
 	*/
 	void FireLineTrace();
+
+	/**
+	* possess another player character by line trace
+	*/
+	void PossessAnotherCharacter();
 
 	/**
 	* Triggered when the collision hit event fires between our weapon and enemy entities
@@ -315,22 +366,23 @@ private:
 	/** Trigger on attack hit when actor hit enemy */
 	UAudioComponent* PunchAudioComponent;
 
-// Reset combo count timer handler
+	/** Reset combo count timer handler */
 	FTimerHandle ResetComboCountTimer;
 
 	/** Count down arm/idle animation time */
 	FTimerHandle StopArmAnimationTimer;
 
+	/** Saved controller, used for possessing */
+	AController* SavedController;
+
 	UAnimMontage* BaseAttackAnimationMontage;
 	FMeleeCollisionProfile MeleeCollisionProfile;
-	bool IsAnimationBlended;
-	bool IsPlayerMovementEnable;
-	bool IsArmed;
 
 	//Inputs from controller 
 	float MoveForwardValue;
 	float MoveRightValue;
 
+	// Combo hit counter
 	int ComboCount;
 
 	/** Resets combo counter after few seconds */
