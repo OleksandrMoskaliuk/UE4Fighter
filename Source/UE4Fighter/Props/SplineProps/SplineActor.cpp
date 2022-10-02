@@ -1,0 +1,52 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "Components/SplineMeshComponent.h"
+#include "SplineActor.h"
+
+// Sets default values
+ASplineActor::ASplineActor() {
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+	RootComponent = CreateDefaultSubobject<USceneComponent>("RootCompponent");
+	SplineComponent = CreateDefaultSubobject<USplineComponent>("SplineComponent");
+	if (SplineComponent && RootComponent)
+	{
+		SplineComponent->SetupAttachment(RootComponent);
+	}
+}
+
+// Called when the game starts or when spawned
+void ASplineActor::BeginPlay() {
+	AActor::BeginPlay();
+
+}
+
+// Called every frame
+void ASplineActor::Tick(float DeltaTime) {
+	AActor::Tick(DeltaTime);
+
+}
+
+void ASplineActor::OnConstruction(const FTransform& Transform) {
+	AActor::OnConstruction(Transform);
+	if (SplineComponent->GetNumberOfSplinePoints() < 1) { return; }
+	for (int i = 0; i < SplineComponent->GetNumberOfSplinePoints() - 1; i++)
+	{
+		// Get  vectors for making meshes on certain points
+		FVector StartPoint = SplineComponent->GetLocationAtSplinePoint(i, ESplineCoordinateSpace::Local);
+		FVector StartTangent = SplineComponent->GetTangentAtSplinePoint(i, ESplineCoordinateSpace::Local);
+		FVector NextPoint = SplineComponent->GetLocationAtSplinePoint(i + 1, ESplineCoordinateSpace::Local);
+		FVector NextTangent = SplineComponent->GetTangentAtSplinePoint(i + 1, ESplineCoordinateSpace::Local);
+		// Making meshes on spline points
+		USplineMeshComponent* SplineMeshComponent = NewObject<USplineMeshComponent>(this, USplineMeshComponent::StaticClass());
+		SplineMeshComponent->SetStaticMesh(Mesh);
+		SplineMeshComponent->SetMobility(EComponentMobility::Movable);
+		SplineMeshComponent->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+		SplineMeshComponent->RegisterComponentWithWorld(GetWorld());
+		SplineMeshComponent->AttachToComponent(SplineComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		//Locate mesh in the right position 
+		SplineMeshComponent->SetStartAndEnd(StartPoint, StartTangent, NextPoint, NextTangent, true);
+		SplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+}
+
