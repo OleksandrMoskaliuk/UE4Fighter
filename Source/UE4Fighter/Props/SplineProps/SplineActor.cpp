@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Components/SplineMeshComponent.h"
 #include "SplineActor.h"
 
 // Sets default values
@@ -29,7 +28,7 @@ void ASplineActor::Tick(float DeltaTime) {
 
 void ASplineActor::OnConstruction(const FTransform& Transform) {
 	AActor::OnConstruction(Transform);
-	if (SplineComponent->GetNumberOfSplinePoints() < 1) { return; }
+	if (!DefaultMesh) { return; } // if there no mesh no need to go farther
 	for (int i = 0; i < SplineComponent->GetNumberOfSplinePoints() - 1; i++)
 	{
 		// Get  vectors for making meshes on certain points
@@ -39,14 +38,38 @@ void ASplineActor::OnConstruction(const FTransform& Transform) {
 		FVector NextTangent = SplineComponent->GetTangentAtSplinePoint(i + 1, ESplineCoordinateSpace::Local);
 		// Making meshes on spline points
 		USplineMeshComponent* SplineMeshComponent = NewObject<USplineMeshComponent>(this, USplineMeshComponent::StaticClass());
-		SplineMeshComponent->SetStaticMesh(Mesh);
-		SplineMeshComponent->SetMobility(EComponentMobility::Movable);
-		SplineMeshComponent->CreationMethod = EComponentCreationMethod::UserConstructionScript;
-		SplineMeshComponent->RegisterComponentWithWorld(GetWorld());
-		SplineMeshComponent->AttachToComponent(SplineComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		//Locate mesh in the right position 
-		SplineMeshComponent->SetStartAndEnd(StartPoint, StartTangent, NextPoint, NextTangent, true);
-		SplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		if (SplineMeshComponent)
+		{
+			SplineMeshComponent->SetStaticMesh(DefaultMesh);
+			SplineMeshComponent->SetMobility(EComponentMobility::Movable);
+			SplineMeshComponent->CreationMethod = EComponentCreationMethod::UserConstructionScript;
+			SplineMeshComponent->RegisterComponentWithWorld(GetWorld());
+			SplineMeshComponent->AttachToComponent(SplineComponent, FAttachmentTransformRules::KeepRelativeTransform);
+			//Locate mesh in the right position 
+			SplineMeshComponent->SetStartAndEnd(StartPoint, StartTangent, NextPoint, NextTangent, true);
+			SplineMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			SplineMeshComponent->SetForwardAxis(SplineMeshAxis);
+			// Get matirial from MeshMaterialInstanceMap else use default material
+			if (SplineOverrideMap.Contains(i))
+			{
+				//Set Mesh
+				if (SplineOverrideMap.Find(i)->Mesh) 
+				{
+				SplineMeshComponent->SetStaticMesh(SplineOverrideMap.Find(i)->Mesh);
+				}
+				// Set Material
+				if (SplineOverrideMap.Find(i)->MaterialInstance)
+				{
+					SplineMeshComponent->SetMaterial(0, SplineOverrideMap.Find(i)->MaterialInstance);
+				}
+				// Set Axis
+				SplineMeshComponent->SetForwardAxis(SplineOverrideMap.Find(i)->SplineMeshAxis);
+			}
+			else if (DefaultMaterialInstance)
+			{
+				SplineMeshComponent->SetMaterial(0, DefaultMaterialInstance);
+			}
+		}
 	}
 }
 
