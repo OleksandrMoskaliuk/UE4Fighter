@@ -1,27 +1,76 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Props/SplineElevator/SplineElevator.h"
+#include "SplineElevator.h"
 
 // Sets default values
 ASplineElevator::ASplineElevator()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("Spline Component"));
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
+	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Component"));
 
+	SplineComponent->SetupAttachment(GetRootComponent());
+	MeshComponent->AttachTo(SplineComponent);
+	TriggerBox->AttachTo(MeshComponent);
 }
 
 // Called when the game starts or when spawned
 void ASplineElevator::BeginPlay()
 {
-	Super::BeginPlay();
-	
+	AActor::BeginPlay();
+	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ASplineElevator::TriggerBeginOverlap);
+	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &ASplineElevator::TriggerEndOverlap);
+
 }
 
 // Called every frame
 void ASplineElevator::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	AActor::Tick(DeltaTime);
+	if(MovementTimeline.IsPlaying())
+	{
+		MovementTimeline.TickTimeline(DeltaTime);
+	}
+}
+
+void ASplineElevator::StartProcessMovementTimeline(float MovementCurveValue) {
+	const float SplineLength = SplineComponent->GetSplineLength();
+	// MovementCurveValue variation 0.001....1
+	// Get location along all spline points
+	FVector SplineComponentLocation = SplineComponent->GetLocationAtDistanceAlongSpline(MovementCurveValue * SplineLength, ESplineCoordinateSpace::World);
+	FRotator SplineComponentRotation = SplineComponent->GetRotationAtDistanceAlongSpline(MovementCurveValue * SplineLength, ESplineCoordinateSpace::World);
+
+	MeshComponent->SetWorldLocationAndRotation(SplineComponentLocation, this->MeshComponent->GetRelativeRotation());
+
+}
+
+void ASplineElevator::EndProcessMovementTimeline() {
+
+}
+
+void ASplineElevator::TriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Green, __FUNCTION__);
+	if (!MovementCurve)
+	{
+		return;
+	}
+	FOnTimelineFloat ProgressFunction;
+	FOnTimelineEvent FinishTimilineFunction;
+
+	ProgressFunction.BindUFunction(this, TEXT("StartProcessMovementTimeline"));
+	FinishTimilineFunction.BindUFunction(this, TEXT("EndProcessMovementTimeline"));
+
+	MovementTimeline.AddInterpFloat(MovementCurve, ProgressFunction);
+	MovementTimeline.SetTimelineFinishedFunc(FinishTimilineFunction);
+	MovementTimeline.SetTimelineLengthMode(ETimelineLengthMode::TL_LastKeyFrame);
+	MovementTimeline.Play();
+}
+
+void ASplineElevator::TriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+	GEngine->AddOnScreenDebugMessage(1, 2.0f, FColor::Green, __FUNCTION__);
 
 }
 
