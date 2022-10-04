@@ -65,7 +65,7 @@ void UComboWidget::StoreWidgetAnimations() {
 				if (WidgetAnimation && WidgetAnimation->MovieScene)
 				{
 					FName AnimName = WidgetAnimation->MovieScene->GetFName();
-					GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, AnimName.ToString());
+					//GEngine->AddOnScreenDebugMessage(-1, 4.5f, FColor::Magenta, AnimName.ToString());
 					AnimationsMap.Add(AnimName, WidgetAnimation);
 				}
 			}

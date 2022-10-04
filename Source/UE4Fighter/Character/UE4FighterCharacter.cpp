@@ -452,11 +452,11 @@ void AUE4FighterCharacter::OnAttackHit(UPrimitiveComponent* HitComponent, AActor
 }
 
 void AUE4FighterCharacter::CollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-	Log(ELogLevel::INFO, __FUNCTION__);
+	//Log(ELogLevel::INFO, __FUNCTION__);
 }
 
 void AUE4FighterCharacter::CollisionBoxEndOwerlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-	Log(ELogLevel::INFO, __FUNCTION__);
+	//Log(ELogLevel::INFO, __FUNCTION__);
 }
 
 // Input
@@ -543,7 +543,7 @@ void AUE4FighterCharacter::Log(ELogLevel LogLevel1, FString Message) {
 	Log(LogLevel1, Message, ELogOutput::ALL);
 }
 
-void AUE4FighterCharacter::Log(ELogLevel LogLevel1, FString Message, ELogOutput LogOutput) {
+void AUE4FighterCharacter::Log(ELogLevel LogLevel1, FString Message, ELogOutput LogOutput)  {
 
 	// only print when screen is selected and the GEngine object is available
 	if ((LogOutput == ELogOutput::ALL || LogOutput == ELogOutput::SCREEN) && GEngine)
