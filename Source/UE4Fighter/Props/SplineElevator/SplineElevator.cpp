@@ -15,7 +15,7 @@ ASplineElevator::ASplineElevator() {
 	MeshComponent->AttachTo(SplineComponent);
 	TriggerBox->AttachTo(MeshComponent);
 	AutoRestartSwitcher = false;
-	AutoStart = false;
+	AutoStartFromBeginPlay = false;
 	RestartOption = ASplineElevatorRestartOption::OFF;
 }
 
@@ -38,7 +38,7 @@ void ASplineElevator::BeginPlay() {
 		MovementTimeline.SetTimelineFinishedFunc(FinishTimilineFunction);
 		MovementTimeline.SetTimelineLengthMode(ETimelineLengthMode::TL_LastKeyFrame);
 	}
-	if (AutoStart) 
+	if (AutoStartFromBeginPlay)
 	{
 		MovementTimeline.Play();
 	}
@@ -68,53 +68,103 @@ void ASplineElevator::StartProcessMovementTimeline(float MovementCurveValue) {
 
 void ASplineElevator::EndProcessMovementTimeline() {
 	GEngine->AddOnScreenDebugMessage(200, 0.1f, FColor::Yellow, __FUNCTION__);
-	// AutoRestart
-	if (AutoRestart)
+	switch (RestartOption)
 	{
-		if (AutoRestartSwitcher)
+		case ASplineElevatorRestartOption::OFF:
+			// in case if AutoStartFromBeginPlay execute once
+			if (AutoStartFromBeginPlay && !AutoRestartSwitcher)
+			{
+				MovementTimeline.Reverse();
+				AutoRestartSwitcher = true;
+			} break;
+		case ASplineElevatorRestartOption::DEFAULT:
 		{
-			MovementTimeline.PlayFromStart();
-			AutoRestartSwitcher = false;
-		}
-		else
+			if (AutoRestartSwitcher)
+			{
+				MovementTimeline.PlayFromStart();
+				AutoRestartSwitcher = false;
+			}
+			else
+			{
+				MovementTimeline.Reverse();
+				AutoRestartSwitcher = true;
+			}
+		} break;
+		case ASplineElevatorRestartOption::FROM_BEGIN:
 		{
-			MovementTimeline.Reverse();
-			AutoRestartSwitcher = true;
-		}
+			if (!MovementTimeline.IsPlaying())
+			{
+				MovementTimeline.PlayFromStart();
+			}
+		}break;
+		case ASplineElevatorRestartOption::FROM_END:
+		{
+			if (!MovementTimeline.IsReversing())
+			{
+				MovementTimeline.ReverseFromEnd();
+			}
+		} break;
+		default:
+			break;
 	}
-	// AutoRestartFromEnd
- if (AutoRestartFromEnd)
-	{
-		if (!MovementTimeline.IsPlaying())
-		{
-			MovementTimeline.PlayFromStart();
-		}
-	}
-	//AutoRestartFromBegin
-	if (AutoRestartFromBegin)
-	{
-		if (!MovementTimeline.IsPlaying())
-		{
-			MovementTimeline.PlayFromStart();
-		}
-	}
+
+
 }
 
 void ASplineElevator::TriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	GEngine->AddOnScreenDebugMessage(400, 2.0f, FColor::Green, __FUNCTION__);
-	if(!AutoStart)
+	switch (RestartOption)
 	{
-		MovementTimeline.Play();
-	}
-	
+		case ASplineElevatorRestartOption::OFF:
+		{
+			if (!MovementTimeline.IsPlaying())
+			{
+				MovementTimeline.Play();
+			}
+		} break;
+		case ASplineElevatorRestartOption::DEFAULT:
+			if (!MovementTimeline.IsPlaying())
+			{
+				MovementTimeline.Play();
+			}
+		break;
+		case ASplineElevatorRestartOption::FROM_BEGIN:
+			if (!MovementTimeline.IsPlaying())
+			{
+				MovementTimeline.Play();
+			}
+			break;
+		case ASplineElevatorRestartOption::FROM_END:
+			if (!MovementTimeline.IsPlaying())
+			{
+				MovementTimeline.Play();
+			}
+			break;
+		default:
+			break;
+	} //switch (RestartOption)
 }
 
 void ASplineElevator::TriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
 	GEngine->AddOnScreenDebugMessage(400, 2.0f, FColor::Green, __FUNCTION__);
-	if (!MovementTimeline.IsReversing() && !AutoRestart && !ReverseAutoRestart)
+	switch (RestartOption)
 	{
-		MovementTimeline.Reverse();
-	}
+		case ASplineElevatorRestartOption::OFF:
+		{
+			if (!MovementTimeline.IsReversing())
+			{
+				MovementTimeline.Reverse();
+			}
+		} break;
+		case ASplineElevatorRestartOption::DEFAULT:
+			break;
+		case ASplineElevatorRestartOption::FROM_BEGIN:
+			break;
+		case ASplineElevatorRestartOption::FROM_END:
+			break;
+		default:
+			break;
+	} // switch (RestartOption)
 
 }
 

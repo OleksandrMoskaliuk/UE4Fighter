@@ -12,8 +12,8 @@
 
 UENUM(BlueprintType)
 enum class ASplineElevatorRestartOption : uint8 {
-	OFF			UMETA(DisplayName = "Turn off restart elevator"),
-	DEFAULT			UMETA(DisplayName = "Default restart elevator by player"),
+	OFF			UMETA(DisplayName = "Only player interraction can restart elevator"),
+	DEFAULT			UMETA(DisplayName = "Default auto restart elevator"),
 	FROM_BEGIN			UMETA(DisplayName = "Restart elevator from start spline point"),
 	FROM_END			UMETA(DisplayName = "Restart elevator from start spline from end spline point")
 };
@@ -37,7 +37,7 @@ class UE4FIGHTER_API ASplineElevator : public AActor
 	
 	/** Turn on spline elevator from begin playing  */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Restart Option", meta = (AllowPrivateAccess = "true"))
-		bool AutoStart;
+		bool AutoStartFromBeginPlay;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Restart Option", meta = (AllowPrivateAccess = "true"))
 		ASplineElevatorRestartOption RestartOption;
