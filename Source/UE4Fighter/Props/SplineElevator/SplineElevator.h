@@ -10,6 +10,14 @@
 
 #include "SplineElevator.generated.h"
 
+UENUM(BlueprintType)
+enum class ASplineElevatorRestartOption : uint8 {
+	OFF			UMETA(DisplayName = "Turn off restart elevator"),
+	DEFAULT			UMETA(DisplayName = "Default restart elevator by player"),
+	FROM_BEGIN			UMETA(DisplayName = "Restart elevator from start spline point"),
+	FROM_END			UMETA(DisplayName = "Restart elevator from start spline from end spline point")
+};
+
 UCLASS()
 class UE4FIGHTER_API ASplineElevator : public AActor
 {
@@ -24,11 +32,21 @@ class UE4FIGHTER_API ASplineElevator : public AActor
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
 		UBoxComponent* TriggerBox;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
 		UCurveFloat* MovementCurve;
+	
+	/** Turn on spline elevator from begin playing  */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Restart Option", meta = (AllowPrivateAccess = "true"))
+		bool AutoStart;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Restart Option", meta = (AllowPrivateAccess = "true"))
+		ASplineElevatorRestartOption RestartOption;
 
 	// Plays movement 
 	FTimeline MovementTimeline;
+
+	// Using for auto restart spline elevator logick  
+	bool AutoRestartSwitcher;
 
 public:	
 	// Sets default values for this actor's properties
