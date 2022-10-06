@@ -8,12 +8,11 @@ AMovingSplineActor::AMovingSplineActor() {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("Spline Component"));
-	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh Component"));
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Box Component"));
 
 	SplineComponent->SetupAttachment(GetRootComponent());
-	MeshComponent->AttachTo(SplineComponent);
-	TriggerBox->AttachTo(MeshComponent);
+	TriggerBox->AttachTo(SplineComponent);
+
 	AutoRestartSwitcher = false;
 	AutoStartFromBeginPlay = false;
 	RestartOption = ASplineElevatorRestartOption::OFF;
@@ -52,18 +51,22 @@ void AMovingSplineActor::Tick(float DeltaTime) {
 		MovementTimeline.TickTimeline(DeltaTime);
 	}
 
+}
 
+FVector AMovingSplineActor::GetSplineLocation() {
+	return SplineComponentLocation;
+}
+
+FRotator AMovingSplineActor::GetSplineRotation() {
+	return SplineComponentRotation;
 }
 
 void AMovingSplineActor::StartProcessMovementTimeline(float MovementCurveValue) {
 	const float SplineLength = SplineComponent->GetSplineLength();
 	// MovementCurveValue variation 0.001....1
 	// Get location along all spline points
-	FVector SplineComponentLocation = SplineComponent->GetLocationAtDistanceAlongSpline(MovementCurveValue * SplineLength, ESplineCoordinateSpace::World);
-	FRotator SplineComponentRotation = SplineComponent->GetRotationAtDistanceAlongSpline(MovementCurveValue * SplineLength, ESplineCoordinateSpace::World);
-	SplineComponentRotation.Pitch = 0;
-	MeshComponent->SetWorldLocationAndRotation(SplineComponentLocation, SplineComponentRotation);
-
+	SplineComponentLocation = SplineComponent->GetLocationAtDistanceAlongSpline(MovementCurveValue * SplineLength, ESplineCoordinateSpace::World);
+	SplineComponentRotation = SplineComponent->GetRotationAtDistanceAlongSpline(MovementCurveValue * SplineLength, ESplineCoordinateSpace::World);
 }
 
 void AMovingSplineActor::EndProcessMovementTimeline() {
@@ -117,10 +120,7 @@ void AMovingSplineActor::TriggerBeginOverlap(UPrimitiveComponent* OverlappedComp
 	{
 		case ASplineElevatorRestartOption::OFF:
 		{
-			if (!MovementTimeline.IsPlaying())
-			{
 				MovementTimeline.Play();
-			}
 		} break;
 		case ASplineElevatorRestartOption::DEFAULT:
 			if (!MovementTimeline.IsPlaying())

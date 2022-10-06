@@ -23,15 +23,6 @@ class UE4FIGHTER_API AMovingSplineActor : public AActor
 {
 	GENERATED_BODY()
 
-		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
-		USplineComponent* SplineComponent;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
-		UStaticMeshComponent* MeshComponent;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
-		UBoxComponent* TriggerBox;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
 		UCurveFloat* MovementCurve;
 	
@@ -45,6 +36,12 @@ class UE4FIGHTER_API AMovingSplineActor : public AActor
 	// Plays movement 
 	FTimeline MovementTimeline;
 
+	// holds last spline location from StartProcessMovementTimeline
+	FVector SplineComponentLocation;
+ 
+	// holds last spline rotation from StartProcessMovementTimeline
+	FRotator SplineComponentRotation;
+
 	// Using for auto restart spline elevator logick  
 	bool AutoRestartSwitcher;
 
@@ -53,6 +50,13 @@ public:
 	AMovingSplineActor();
 
 protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
+		USplineComponent* SplineComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* TriggerBox;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -60,8 +64,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	FVector GetSplineLocation();
+
+	FRotator GetSplineRotation();
+
 	UFUNCTION()
-		void StartProcessMovementTimeline(float MovementCurveValue);
+		virtual void StartProcessMovementTimeline(float MovementCurveValue);
 
 	UFUNCTION()
 		void EndProcessMovementTimeline();
@@ -69,6 +77,7 @@ public:
 	UFUNCTION()
 		void TriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	//Trigger by box overlap or AutoStartFromBeginPlay
 	UFUNCTION()
-	void TriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	 void TriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };
