@@ -67,6 +67,8 @@ void AMovingSplineActor::StartProcessMovementTimeline(float MovementCurveValue) 
 	// Get location along all spline points
 	SplineComponentLocation = SplineComponent->GetLocationAtDistanceAlongSpline(MovementCurveValue * SplineLength, ESplineCoordinateSpace::World);
 	SplineComponentRotation = SplineComponent->GetRotationAtDistanceAlongSpline(MovementCurveValue * SplineLength, ESplineCoordinateSpace::World);
+	GEngine->AddOnScreenDebugMessage(1998, 1.0f, FColor::Magenta, "MovementCurveValue = " + FString::SanitizeFloat(MovementCurveValue));
+	
 }
 
 void AMovingSplineActor::EndProcessMovementTimeline() {

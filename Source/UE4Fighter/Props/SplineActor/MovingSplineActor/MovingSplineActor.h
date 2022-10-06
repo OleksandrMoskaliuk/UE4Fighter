@@ -30,9 +30,6 @@ class UE4FIGHTER_API AMovingSplineActor : public AActor
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Restart Option", meta = (AllowPrivateAccess = "true"))
 		bool AutoStartFromBeginPlay;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Restart Option", meta = (AllowPrivateAccess = "true"))
-		ASplineElevatorRestartOption RestartOption;
-
 	// Plays movement 
 	FTimeline MovementTimeline;
 
@@ -48,19 +45,6 @@ class UE4FIGHTER_API AMovingSplineActor : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AMovingSplineActor();
-
-protected:
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
-		USplineComponent* SplineComponent;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
-		UBoxComponent* TriggerBox;
-	
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -74,10 +58,26 @@ public:
 	UFUNCTION()
 		void EndProcessMovementTimeline();
 
+	//Trigger by box overlap or AutoStartFromBeginPlay
 	UFUNCTION()
-		void TriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+		virtual void TriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	//Trigger by box overlap or AutoStartFromBeginPlay
 	UFUNCTION()
-	 void TriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+		virtual void TriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
+		USplineComponent* SplineComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Spline", meta = (AllowPrivateAccess = "true"))
+		UBoxComponent* TriggerBox;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Restart Option", meta = (AllowPrivateAccess = "true"))
+		ASplineElevatorRestartOption RestartOption;
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
 };

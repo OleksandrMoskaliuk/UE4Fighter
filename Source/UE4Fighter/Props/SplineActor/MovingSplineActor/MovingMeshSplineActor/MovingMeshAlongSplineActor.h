@@ -2,11 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "Components/SplineComponent.h"
-#include "Components/SplineMeshComponent.h"
-#include "Engine/DataTable.h"
 #include "../MovingSplineActor.h"
 
 #include "MovingMeshAlongSplineActor.generated.h"
