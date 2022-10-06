@@ -5,7 +5,7 @@
 
 #include "Components/BoxComponent.h"
 #include "GameFramework/Pawn.h"
-#include "../Character/UE4FighterCharacter.h"
+#include "../../Character/UE4FighterCharacter.h"
 
 // Sets default values
 ADestructibleProps::ADestructibleProps()

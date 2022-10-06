@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "SplineActor.h"
+#include "MovingMeshAlongSplineActor.h"
 
 // Sets default values
-ASplineActor::ASplineActor() {
+AMovingMeshAlongSplineActor::AMovingMeshAlongSplineActor() {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	RootComponent = CreateDefaultSubobject<USceneComponent>("RootCompponent");
@@ -15,18 +15,18 @@ ASplineActor::ASplineActor() {
 }
 
 // Called when the game starts or when spawned
-void ASplineActor::BeginPlay() {
+void AMovingMeshAlongSplineActor::BeginPlay() {
 	AActor::BeginPlay();
 
 }
 
 // Called every frame
-void ASplineActor::Tick(float DeltaTime) {
+void AMovingMeshAlongSplineActor::Tick(float DeltaTime) {
 	AActor::Tick(DeltaTime);
 
 }
 
-void ASplineActor::OnConstruction(const FTransform& Transform) {
+void AMovingMeshAlongSplineActor::OnConstruction(const FTransform& Transform) {
 	AActor::OnConstruction(Transform);
 	if (!DefaultMesh) { return; } // if there no mesh no need to go farther
 	for (int i = 0; i < SplineComponent->GetNumberOfSplinePoints() - 1; i++)

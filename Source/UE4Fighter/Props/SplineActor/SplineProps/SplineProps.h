@@ -8,7 +8,7 @@
 #include "Components/SplineMeshComponent.h"
 #include "Engine/DataTable.h"
 
-#include "SplineActor.generated.h"
+#include "SplineProps.generated.h"
 
 USTRUCT(BlueprintType)
 struct FSplineDetails : public FTableRowBase
@@ -32,7 +32,7 @@ struct FSplineDetails : public FTableRowBase
 };
 
 UCLASS()
-class UE4FIGHTER_API ASplineActor : public AActor
+class UE4FIGHTER_API ASplineProps : public AActor
 {
 	GENERATED_BODY()
 
@@ -57,7 +57,7 @@ class UE4FIGHTER_API ASplineActor : public AActor
 
 public:
 	// Sets default values for this character's properties
-	ASplineActor();
+	ASplineProps();
 
 protected:
 	// Called when the game starts or when spawned

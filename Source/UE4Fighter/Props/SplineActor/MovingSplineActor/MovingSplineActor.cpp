@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SplineElevator.h"
+#include "MovingSplineActor.h"
 
 // Sets default values
-ASplineElevator::ASplineElevator() {
+AMovingSplineActor::AMovingSplineActor() {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("Spline Component"));
@@ -20,11 +20,11 @@ ASplineElevator::ASplineElevator() {
 }
 
 // Called when the game starts or when spawned
-void ASplineElevator::BeginPlay() {
+void AMovingSplineActor::BeginPlay() {
 	AActor::BeginPlay();
 
-	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &ASplineElevator::TriggerBeginOverlap);
-	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &ASplineElevator::TriggerEndOverlap);
+	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AMovingSplineActor::TriggerBeginOverlap);
+	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &AMovingSplineActor::TriggerEndOverlap);
 
 	// setup for MovementTimeline
 	FOnTimelineFloat ProgressFunction;
@@ -45,7 +45,7 @@ void ASplineElevator::BeginPlay() {
 }
 
 // Called every frame
-void ASplineElevator::Tick(float DeltaTime) {
+void AMovingSplineActor::Tick(float DeltaTime) {
 	AActor::Tick(DeltaTime);
 	if (MovementTimeline.IsPlaying())
 	{
@@ -55,7 +55,7 @@ void ASplineElevator::Tick(float DeltaTime) {
 
 }
 
-void ASplineElevator::StartProcessMovementTimeline(float MovementCurveValue) {
+void AMovingSplineActor::StartProcessMovementTimeline(float MovementCurveValue) {
 	const float SplineLength = SplineComponent->GetSplineLength();
 	// MovementCurveValue variation 0.001....1
 	// Get location along all spline points
@@ -66,7 +66,7 @@ void ASplineElevator::StartProcessMovementTimeline(float MovementCurveValue) {
 
 }
 
-void ASplineElevator::EndProcessMovementTimeline() {
+void AMovingSplineActor::EndProcessMovementTimeline() {
 	GEngine->AddOnScreenDebugMessage(200, 0.1f, FColor::Yellow, __FUNCTION__);
 	switch (RestartOption)
 	{
@@ -111,7 +111,7 @@ void ASplineElevator::EndProcessMovementTimeline() {
 
 }
 
-void ASplineElevator::TriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+void AMovingSplineActor::TriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	GEngine->AddOnScreenDebugMessage(400, 2.0f, FColor::Green, __FUNCTION__);
 	switch (RestartOption)
 	{
@@ -145,7 +145,7 @@ void ASplineElevator::TriggerBeginOverlap(UPrimitiveComponent* OverlappedCompone
 	} //switch (RestartOption)
 }
 
-void ASplineElevator::TriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
+void AMovingSplineActor::TriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
 	GEngine->AddOnScreenDebugMessage(400, 2.0f, FColor::Green, __FUNCTION__);
 	switch (RestartOption)
 	{

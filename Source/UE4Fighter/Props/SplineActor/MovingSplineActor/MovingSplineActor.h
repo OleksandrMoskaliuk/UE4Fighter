@@ -8,7 +8,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/TimelineComponent.h"
 
-#include "SplineElevator.generated.h"
+#include "MovingSplineActor.generated.h"
 
 UENUM(BlueprintType)
 enum class ASplineElevatorRestartOption : uint8 {
@@ -19,7 +19,7 @@ enum class ASplineElevatorRestartOption : uint8 {
 };
 
 UCLASS()
-class UE4FIGHTER_API ASplineElevator : public AActor
+class UE4FIGHTER_API AMovingSplineActor : public AActor
 {
 	GENERATED_BODY()
 
@@ -50,7 +50,7 @@ class UE4FIGHTER_API ASplineElevator : public AActor
 
 public:	
 	// Sets default values for this actor's properties
-	ASplineElevator();
+	AMovingSplineActor();
 
 protected:
 	// Called when the game starts or when spawned
